@@ -64,62 +64,50 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .aci-item span{flex:1}.aci-del{font-size:11px;color:var(--gray);padding:1px 5px;border-radius:3px;flex-shrink:0}
 .aci-del:hover{background:var(--rl);color:var(--red)}
 
-/* ========== タブ①：作業入力 ========== */
-.step-blk{border:2px solid var(--bdr);border-radius:10px;margin-bottom:12px;background:#fff;overflow:hidden;display:grid;grid-template-columns:290px 1fr}
-.step-blk.sp{border-color:#fbbf24}
-.step-cell{grid-column:1;grid-row:1/-1;background:#fde8e8;border-right:1.5px solid #fca5a5;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
-.step-top-row{display:flex;align-items:center;gap:8px}
-/* ステップ名入力欄：薄赤背景 */
-.step-cell .aci{background:#fff0f0 !important;border-color:#fca5a5 !important}
-.step-cell .aci:focus{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.12) !important}
-.step-no{background:var(--navy);color:#fff;min-width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 2px var(--navy)}
-.step-acts{display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:wrap}
-.wtype-btns{display:flex;flex-wrap:wrap;gap:5px}
-.wtb{padding:3px 11px;border-radius:16px;border:1.5px solid var(--bdr);background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:var(--gray);transition:.13s}
+/* ========== 統合テーブル（ステップ・作業内容・リスク・対策を1画面で） ========== */
+.uni-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+.uni-table th{background:var(--navy);color:#fff;padding:7px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;z-index:2}
+.uni-table td{border:1px solid #e2e8f0;padding:6px 8px;vertical-align:top}
+.uni-table tr.row-sp td{background:#fffdf5}
+.uni-table col-narrow{width:40px}
+.td-step{width:200px;background:#fde8e8}
+.td-cont{width:170px;background:#f5f8ff}
+.td-risk{width:190px;background:#fff5f5}
+.td-sel{width:78px}
+.td-meas{width:190px;background:#f0fff4}
+.td-act{width:44px;text-align:center}
+.uni-table textarea.fi{width:100%;resize:vertical;min-height:44px;font-size:12px;padding:5px 6px}
+.uni-table select.rals{width:100%;padding:4px 4px;font-size:11px}
+.uni-table .td-act button{display:block;width:100%;margin-bottom:3px;padding:4px 0;font-size:12px}
+.step-cell-inner,.cont-cell-inner{display:flex;flex-direction:column;gap:6px}
+.step-top-row,.cont-top-row{display:flex;align-items:center;gap:6px}
+.step-cell-inner .aci,.cont-cell-inner .aci{font-size:12px;padding:5px 7px}
+.step-no{background:var(--navy);color:#fff;min-width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0}
+.step-acts,.cont-acts2{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.wtype-btns{display:flex;flex-wrap:wrap;gap:4px}
+.wtb{padding:2px 8px;border-radius:14px;border:1.5px solid var(--bdr);background:#fff;cursor:pointer;font-size:11px;font-weight:700;color:var(--gray);transition:.13s}
 .wtb.s0{background:var(--gl);border-color:#4ade80;color:#166534}
 .wtb.s1{background:var(--rl);border-color:#f87171;color:#991b1b}
 .wtb.s2{background:var(--ol);border-color:#fb923c;color:#9a3412}
 .wtb.s3{background:var(--yl);border-color:#fbbf24;color:#92400e}
-.cont-cell{grid-column:2;display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid #f1f5f9}
-.cont-cell:last-of-type{border-bottom:none}
-.cont-no{background:#e2e8f0;color:#475569;min-width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
-.cont-acts{display:flex;gap:3px;flex-shrink:0}
-.cont-add-cell{grid-column:2;padding:7px 13px}
-
-
-/* ========== タブ②：リスク設定 ========== */
-.risk-blk{border:1.5px solid var(--bdr);border-radius:9px;margin-bottom:12px;background:#fff;overflow:hidden}
-.risk-blk.sp-blk{border-color:#fca5a5}
-.risk-hdr{padding:8px 13px;background:#f8fafc;border-bottom:1px solid var(--bdr);font-size:13px;font-weight:700;color:var(--navy)}
-.risk-hdr .sp-tag{font-size:10px;color:#991b1b;font-weight:900;margin-left:6px}
-.risk-cont-row{border-bottom:1px solid #f1f5f9}
-.risk-cont-row:last-child{border-bottom:none}
-.risk-cont-hdr{display:flex;align-items:center;gap:7px;padding:7px 13px;background:#fafbfd;border-bottom:1px solid #f1f5f9}
-.rcno{background:#e2e8f0;color:#475569;min-width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
-.risk-item{padding:10px 13px 10px 26px;border-bottom:1px dashed #f1f5f9}
-.risk-item:last-child{border-bottom:none}
-.ri-num{font-size:10px;font-weight:700;color:var(--gray);display:flex;align-items:center;gap:6px;flex-shrink:0}
-.ri-topbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:7px}
-.ri-row{display:flex;gap:8px;flex-wrap:wrap}
-/* 事故の型ラベル */
-.atlb{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
-/* RA */
-.rals{padding:4px 7px;border:1.5px solid var(--bdr);border-radius:5px;font-size:12px;background:#fff;outline:none;cursor:pointer}
+.cont-no{background:#e2e8f0;color:#475569;min-width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
+.rals{padding:4px 6px;border:1.5px solid var(--bdr);border-radius:5px;font-size:11px;background:#fff;outline:none;cursor:pointer}
 .rals:focus{border-color:var(--blue)}
-.rasc{padding:3px 9px;border-radius:5px;font-size:12px;font-weight:900;background:#f1f5f9;color:#334155;min-width:48px;text-align:center}
-.ralv{padding:3px 9px;border-radius:5px;font-size:12px;font-weight:900;min-width:42px;text-align:center}
+.ralv{padding:2px 6px;border-radius:5px;font-size:10px;font-weight:900;text-align:center;margin-top:4px;display:inline-block}
 /* Lv: Ⅰ=低リスク(緑)→Ⅳ=高リスク(赤) */
 .lv1{background:var(--gl);color:#166534}
 .lv2{background:var(--yl);color:#92400e}
 .lv3{background:var(--ol);color:#9a3412}
 .lv4{background:var(--rl);color:#991b1b}
-/* ステップ交互背景色 */
-.sbg0{background:#f0f7ff}.sbg1{background:#f5f0ff}.sbg2{background:#f0fff8}
-.sbg3{background:#fff8f0}.sbg4{background:#f0faff}.sbg5{background:#fff0f5}
 /* リスク・対策テキストエリア背景 */
 .ta-risk{background:#fff5f5 !important}
 .ta-meas{background:#f0fff4 !important}
-.ri-add-row{padding:8px 13px;display:flex;gap:6px;align-items:center}
+/* 移動先ボタンの強調 */
+.mv-target{background:#dbeafe !important;border-color:#60a5fa !important;color:#1d4ed8 !important;font-weight:900}
+@media(max-width:900px){
+  .uni-table{font-size:11.5px}
+  .td-step{width:150px}.td-cont{width:130px}.td-risk{width:150px}.td-meas{width:150px}
+}
 /* アラート */
 .al{padding:9px 13px;border-radius:7px;margin-bottom:11px;font-size:13px;font-weight:500;line-height:1.6}
 .alw{background:var(--yl);color:#78350f;border-left:4px solid #f59e0b}
@@ -171,17 +159,12 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
   <input type="file" id="db-file-input" accept=".xlsx" style="display:none">
   <span id="db-status" style="font-size:11px;color:#fff;opacity:.85;margin-right:8px"></span>
   <button class="hbtn" id="btn-clear-hist">🗑️ 履歴削除</button>
-</div>
-
-<div id="tabs">
-  <button class="tab active" data-tab="tp">📝 ① 作業入力</button>
-  <button class="tab" data-tab="tr">⚠️ ② リスク・対策<span class="tbadge" id="mbadge" style="display:none">!</span></button>
-  <button class="tab" data-tab="tv">📄 ③ プレビュー</button>
+  <button class="hbtn" id="btn-xlsx" style="background:#0f7b6c">📥 Excel出力</button>
+  <button class="hbtn" id="btn-xlsx-pc">🖥️ 雛形用JSON</button>
 </div>
 
 <div id="main">
 
-  <!-- ① 作業入力 -->
   <div class="panel active" id="tp">
     <div class="card">
       <div class="card-hd"><div class="card-hd-l">基本情報</div></div>
@@ -207,34 +190,17 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 
     <div class="card">
       <div class="card-hd">
-        <div class="card-hd-l">作業ステップ・作業内容</div>
+        <div class="card-hd-l">作業ステップ・作業内容・リスク・対策</div>
         <button class="btn bn bsm" id="btn-add-step">＋ ステップを追加</button>
       </div>
       <div class="al ali" style="font-size:12px;line-height:1.7;margin-bottom:12px">
-        <strong>作業ステップ</strong>：大まかな工程（例：シリンダー整備）　／　
-        <strong>作業内容</strong>：細分された手順（例：取り外し・分解・交換）<br>
-        📌 入力欄クリックで過去の候補が表示されます
+        📌 入力欄クリックで過去の候補が表示されます　／　⇕移動ボタンで行の並べ替えができます
       </div>
-      <div id="steps-con"></div>
+      <div id="malert"></div>
+      <div id="table-con"></div>
     </div>
   </div>
 
-  <!-- ② リスク・対策 -->
-  <div class="panel" id="tr">
-    <div id="malert"></div>
-    <div id="risk-con"></div>
-  </div>
-
-  <!-- ③ プレビュー -->
-  <div class="panel" id="tv">
-    <div class="no-print" style="display:flex;gap:9px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn bn" id="btn-xlsx">📥 Excelファイルに出力</button>
-      <button class="btn" id="btn-xlsx-pc" style="background:#1e3a5f;color:#fff;">🖥️ 雛形用JSONを出力（PC用）</button>
-      <span style="color:var(--gray);font-size:12px">🖥️ PC用：JSONを出力 → 雛形取込.py で雛形Excelに変換</span>
-    </div>
-    <div id="malert2"></div>
-    <div id="pvwrap"></div>
-  </div>
 </div>
 
 <!-- DBモーダル -->
@@ -2511,7 +2477,7 @@ function execClear(){
   if(document.getElementById('ac-comp-wrap')._inp)document.getElementById('ac-comp-wrap')._inp.value='';
   if(document.getElementById('ac-site-wrap')._inp)document.getElementById('ac-site-wrap')._inp.value='';
   if(document.getElementById('ac-mgr-wrap')._inp)document.getElementById('ac-mgr-wrap')._inp.value='';
-  steps=[];addStep();render();renderRisk&&renderRisk();
+  steps=[];addStep();renderTable();
   lsStrSet(LS_DATA,'');markSaved();
   alert('クリアしました。');
 }
@@ -2559,7 +2525,7 @@ document.addEventListener('DOMContentLoaded',function(){
   compWrap.appendChild(acComp.querySelector('.acd'));
   compWrap._inp=acComp._inp||acComp.querySelector('.aci');
 
-  render();bindGlobal();initDbModal();initDbStatus();
+  renderTable();bindGlobal();initDbModal();initDbStatus();
 
   // 自動保存タイマー
   setInterval(function(){if(_dirty)autoSave();},5000);
@@ -2572,18 +2538,7 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 function bindGlobal(){
-  document.querySelectorAll('.tab').forEach(function(btn){
-    btn.addEventListener('click',function(){
-      var tid=btn.getAttribute('data-tab');
-      document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
-      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-      btn.classList.add('active');document.getElementById(tid).classList.add('active');
-      if(tid==='tr')renderRisk();
-      if(tid==='tv')renderPreview();
-      updBadge();
-    });
-  });
-  document.getElementById('btn-add-step').addEventListener('click',function(){addStep();render();markDirty();});
+  document.getElementById('btn-add-step').addEventListener('click',function(){addStep();renderTable();markDirty();});
   document.getElementById('db-cancel').addEventListener('click',closeDb);
   document.getElementById('db-ok').addEventListener('click',addFromDb);
   document.getElementById('db-modal').addEventListener('click',function(e){if(e.target===this)closeDb();});
@@ -2613,71 +2568,60 @@ function bindGlobal(){
 
 // ---------- ステップ・作業内容操作 ----------
 function addStep(after){var s={id:uid(),name:'',workType:[],contents:[newC()]};if(after===undefined){steps.push(s);}else{steps.splice(after+1,0,s);}renum();}
-function delStep(id){if(steps.length<=1){alert('最低1つ必要です');return;}steps=steps.filter(function(s){return s.id!==id;});renum();render();markDirty();}
-function mvStep(id,d){var i=steps.findIndex(function(s){return s.id===id;}),j=i+d;if(j<0||j>=steps.length)return;var t=steps[i];steps[i]=steps[j];steps[j]=t;renum();render();markDirty();}
-function addC(sid,after){var s=steps.find(function(x){return x.id===sid;});if(!s)return;var c=newC();if(after===undefined){s.contents.push(c);}else{s.contents.splice(after+1,0,c);}render();markDirty();}
-function delC(sid,cid){var s=steps.find(function(x){return x.id===sid;});if(!s)return;if(s.contents.length<=1){alert('最低1つ必要です');return;}s.contents=s.contents.filter(function(c){return c.id!==cid;});render();markDirty();}
-function mvC(sid,cid,d){var s=steps.find(function(x){return x.id===sid;});if(!s)return;var i=s.contents.findIndex(function(c){return c.id===cid;}),j=i+d;if(j<0||j>=s.contents.length)return;var t=s.contents[i];s.contents[i]=s.contents[j];s.contents[j]=t;render();markDirty();}
-function addR(cid){var c=findC(cid);if(!c)return;c.risks.push(newR());renderRisk();markDirty();}
-function delR(cid,rid){var c=findC(cid);if(!c)return;if(c.risks.length<=1){alert('最低1件必要です');return;}c.risks=c.risks.filter(function(r){return r.id!==rid;});renderRisk();markDirty();}
+function delStep(id){if(steps.length<=1){alert('最低1つ必要です');return;}steps=steps.filter(function(s){return s.id!==id;});renum();markDirty();}
+function addC(sid,after){var s=steps.find(function(x){return x.id===sid;});if(!s)return;var c=newC();if(after===undefined){s.contents.push(c);}else{s.contents.splice(after+1,0,c);}markDirty();}
+function delC(sid,cid){var s=steps.find(function(x){return x.id===sid;});if(!s)return;if(s.contents.length<=1){alert('最低1つ必要です');return;}s.contents=s.contents.filter(function(c){return c.id!==cid;});markDirty();}
+function addR(cid){var c=findC(cid);if(!c)return;c.risks.push(newR());renderTable();markDirty();}
+function delR(cid,rid){var c=findC(cid);if(!c)return;if(c.risks.length<=1){alert('最低1件必要です');return;}c.risks=c.risks.filter(function(r){return r.id!==rid;});renderTable();markDirty();}
 function findC(cid){var found=null;steps.forEach(function(s){s.contents.forEach(function(c){if(c.id===cid)found=c;});});return found;}
+function findStepByContentId(cid){var found=null;steps.forEach(function(s){s.contents.forEach(function(c){if(c.id===cid)found=s;});});return found;}
 
-// ---------- ① 作業入力タブ描画 ----------
-function render(){
-  var con=document.getElementById('steps-con');con.innerHTML='';
-  steps.forEach(function(s,si){
-    var hasSp=s.workType.some(function(t){return SPECIAL.indexOf(t)>=0;});
-    var blk=mk('div','step-blk'+(hasSp?' sp':''));
-
-    // 左列：ステップ（Excelのステップ列と同じく、右側の作業内容行ぶんの高さで結合表示）
-    var stepCell=mk('div','step-cell');
-    var topRow=mk('div','step-top-row');
-    topRow.appendChild(mk('div','step-no','S'+s._no));
-    var acS=makeAC('作業ステップ名（例：シリンダー整備）',LS_STEP,s.name,function(v){s.name=v;markDirty();});
-    acS.style.flex='1';acS.style.minWidth='0';
-    topRow.appendChild(acS);
-    stepCell.appendChild(topRow);
-
-    var sa=mk('div','step-acts');
-    var bu=mkbtn('▲','bg bic',function(){mvStep(s.id,-1);});bu.disabled=si===0;sa.appendChild(bu);
-    var bd=mkbtn('▼','bg bic',function(){mvStep(s.id,1);});bd.disabled=si===steps.length-1;sa.appendChild(bd);
-    sa.appendChild(mkbtn('＋追加','bg bsm',function(){addStep(si);render();markDirty();}));
-    sa.appendChild(mkbtn('✕削除','br bsm',function(){delStep(s.id);}));
-    stepCell.appendChild(sa);
-
-    var wbs=mk('div','wtype-btns');
-    WTYPE.forEach(function(type,ti){
-      var sel=s.workType.indexOf(type)>=0;
-      var icons=['⚠️','🪜','🔥'];
-      var wb=mk('button','wtb '+(sel?WCLS[ti]:''),(icons[ti]||'🔧')+' '+type);
-      wb.addEventListener('click',function(){var i=s.workType.indexOf(type);if(i>=0)s.workType.splice(i,1);else s.workType.push(type);render();updBadge();markDirty();});
-      wbs.appendChild(wb);
-    });
-    stepCell.appendChild(wbs);
-    blk.appendChild(stepCell);
-
-    // 右列：作業内容（1行＝1レコード。Excelの隣接列と同じ並び）
-    s.contents.forEach(function(c,ci){
-      var row=mk('div','cont-cell');
-      row.appendChild(mk('div','cont-no',String(ci+1)));
-      var acC=makeAC('作業内容（例：シリンダー取り外し）',LS_CONT,c.name,function(v){c.name=v;markDirty();});
-      acC.style.flex='1';acC.style.minWidth='0';
-      row.appendChild(acC);
-      var ca2=mk('div','cont-acts');
-      var cu=mkbtn('▲','bg bic',function(){mvC(s.id,c.id,-1);});cu.disabled=ci===0;ca2.appendChild(cu);
-      var cd2=mkbtn('▼','bg bic',function(){mvC(s.id,c.id,1);});cd2.disabled=ci===s.contents.length-1;ca2.appendChild(cd2);
-      ca2.appendChild(mkbtn('＋','bg bic',function(){addC(s.id,ci);}));
-      ca2.appendChild(mkbtn('✕','br bic',function(){delC(s.id,c.id);}));
-      row.appendChild(ca2);
-      blk.appendChild(row);
-    });
-    var addCell=mk('div','cont-add-cell');
-    addCell.appendChild(mkbtn('＋ 作業内容を追加','bg bsm',function(){addC(s.id);markDirty();}));
-    blk.appendChild(addCell);
-
-    con.appendChild(blk);
+// ---------- 並べ替え（クリックで「移動する行」を選び、移動先をクリックして確定） ----------
+var _mv=null; // {lvl:'step'|'content'|'risk', id, pid}
+function doMove(lvl,fromId,pid,toId){
+  if(fromId===toId)return;
+  if(lvl==='step'){
+    var fi=steps.findIndex(function(s){return s.id===fromId;});
+    var ti=steps.findIndex(function(s){return s.id===toId;});
+    if(fi<0||ti<0)return;
+    var item=steps.splice(fi,1)[0];
+    if(ti>fi)ti--;
+    steps.splice(ti,0,item);
+    renum();
+  }else if(lvl==='content'){
+    var s=steps.find(function(x){return x.id===pid;});
+    if(!s)return;
+    var fi=s.contents.findIndex(function(c){return c.id===fromId;});
+    var ti=s.contents.findIndex(function(c){return c.id===toId;});
+    if(fi<0||ti<0)return;
+    var item=s.contents.splice(fi,1)[0];
+    if(ti>fi)ti--;
+    s.contents.splice(ti,0,item);
+  }else if(lvl==='risk'){
+    var c=findC(pid);
+    if(!c)return;
+    var fi=c.risks.findIndex(function(r){return r.id===fromId;});
+    var ti=c.risks.findIndex(function(r){return r.id===toId;});
+    if(fi<0||ti<0)return;
+    var item=c.risks.splice(fi,1)[0];
+    if(ti>fi)ti--;
+    c.risks.splice(ti,0,item);
+  }
+  markDirty();
+}
+function mkMoveBtn(lvl,id,pid){
+  var isSelf=_mv&&_mv.lvl===lvl&&_mv.id===id;
+  var isTarget=_mv&&_mv.lvl===lvl&&_mv.id!==id&&_mv.pid===pid;
+  var lbl=isSelf?'✕':(isTarget?'📌':'⇕');
+  var cls=isSelf?'bn bic':(isTarget?'bg bic mv-target':'bg bic');
+  var b=mkbtn(lbl,cls,function(){
+    if(isSelf){_mv=null;}
+    else if(isTarget){doMove(lvl,_mv.id,_mv.pid,id);_mv=null;}
+    else {_mv={lvl:lvl,id:id,pid:pid};}
+    renderTable();
   });
-  updBadge();
+  b.title=isSelf?'移動を取消':(isTarget?'ここに移動':'この行を移動');
+  return b;
 }
 
 // ---------- チェック ----------
@@ -2692,11 +2636,57 @@ function getMiss(){
   });});
   return r;
 }
-function updBadge(){var m=getMiss(),b=document.getElementById('mbadge');b.style.display=m.length>0?'inline':'none';b.textContent=m.length;}
+function updBadge(){var m=getMiss(),b=document.getElementById('mbadge');if(b){b.style.display=m.length>0?'inline':'none';b.textContent=m.length;}}
 
-// ---------- ② リスク・対策タブ描画 ----------
-function renderRisk(){
-  var con=document.getElementById('risk-con');con.innerHTML='';
+// ---------- ステップ・作業内容のセル中身 ----------
+function buildStepCellContent(s,si){
+  var wrap=mk('div','step-cell-inner');
+  var top=mk('div','step-top-row');
+  top.appendChild(mk('div','step-no','S'+s._no));
+  var acS=makeAC('作業ステップ名（例：シリンダー整備）',LS_STEP,s.name,function(v){s.name=v;markDirty();});
+  acS.style.flex='1';acS.style.minWidth='0';
+  top.appendChild(acS);
+  wrap.appendChild(top);
+
+  var wbs=mk('div','wtype-btns');
+  WTYPE.forEach(function(type,ti){
+    var sel=s.workType.indexOf(type)>=0;
+    var icons=['⚠️','🪜','🔥'];
+    var wb=mk('button','wtb '+(sel?WCLS[ti]:''),(icons[ti]||'🔧')+' '+type);
+    wb.addEventListener('click',function(){var i=s.workType.indexOf(type);if(i>=0)s.workType.splice(i,1);else s.workType.push(type);renderTable();markDirty();});
+    wbs.appendChild(wb);
+  });
+  wrap.appendChild(wbs);
+
+  var acts=mk('div','step-acts');
+  acts.appendChild(mkMoveBtn('step',s.id,null));
+  acts.appendChild(mkbtn('＋追加','bg bsm',function(){addStep(si);renderTable();markDirty();}));
+  acts.appendChild(mkbtn('✕削除','br bsm',function(){delStep(s.id);renderTable();}));
+  wrap.appendChild(acts);
+  return wrap;
+}
+function buildContCellContent(s,c,ci){
+  var wrap=mk('div','cont-cell-inner');
+  var row=mk('div','cont-top-row');
+  row.appendChild(mk('div','cont-no',String(ci+1)));
+  var acC=makeAC('作業内容（例：シリンダー取り外し）',LS_CONT,c.name,function(v){c.name=v;markDirty();});
+  acC.style.flex='1';acC.style.minWidth='0';
+  row.appendChild(acC);
+  wrap.appendChild(row);
+
+  var acts=mk('div','cont-acts2');
+  acts.appendChild(mkMoveBtn('content',c.id,s.id));
+  acts.appendChild(mkbtn('＋','bg bic',function(){addC(s.id,ci);renderTable();}));
+  if(s.contents.length>1){
+    acts.appendChild(mkbtn('✕','br bic',function(){delC(s.id,c.id);renderTable();}));
+  }
+  wrap.appendChild(acts);
+  return wrap;
+}
+
+// ---------- 統合テーブル描画（ステップ・作業内容・リスク・対策を1画面に） ----------
+function renderTable(){
+  var con=document.getElementById('table-con');con.innerHTML='';
   var mal=document.getElementById('malert');
   var miss=getMiss();
   if(miss.length>0){
@@ -2705,90 +2695,105 @@ function renderRisk(){
     mal.innerHTML='<div class="al als">✅ 全ての特殊作業のリスクが入力されています。</div>';
   } else { mal.innerHTML=''; }
 
-  if(!steps.length){con.innerHTML='<div class="al ali">① 作業入力タブでステップと作業内容を入力してください。</div>';return;}
+  if(_mv){
+    var hint=mk('div','al ali');
+    hint.style.cssText='margin-bottom:10px;background:#eff6ff;border-color:#93c5fd';
+    hint.textContent='📌 移動先の同じ種類の行にある「📌」ボタンをタップすると、そこに移動します（✕で取消）';
+    con.appendChild(hint);
+  }
+
+  if(!steps.length){
+    con.appendChild(mk('div','al ali','＋ステップを追加してください。'));
+    updBadge();
+    return;
+  }
+
+  var table=mk('table','uni-table');
+  var thead=mk('thead');
+  var htr=mk('tr');
+  ['','作業ステップ','作業内容','リスク内容','事故の型','大きさ','発生率','リスク低減対策',''].forEach(function(h){
+    htr.appendChild(mk('th',null,h));
+  });
+  thead.appendChild(htr);table.appendChild(thead);
+  var tbody=mk('tbody');
 
   steps.forEach(function(s,si){
-    var isSp=SPECIAL.some(function(t){return s.workType.indexOf(t)>=0;});
-    var wb=s.workType.map(function(t){var bc=t==='高所作業'?'bred':t==='重量物'?'borg':t==='火気作業'?'bylw':'bgry';return '<span class="badge '+bc+'" style="font-size:9px;margin-left:3px">'+t+'</span>';}).join('');
-    // ステップごとの背景色
-    var riskBgs=['#f0f7ff','#f5f0ff','#f0fff8','#fff8f0','#f0faff','#fff0f5'];
-    var stepBg=isSp?'#fff3e0':riskBgs[si%riskBgs.length];
-    var blk=mk('div','risk-blk'+(isSp?' sp-blk':''));
-    blk.style.borderColor=isSp?'#fca5a5':'#bfcfe8';
-    var bh=mk('div','risk-hdr');
-    bh.style.background=stepBg;
-    bh.innerHTML='S'+s._no+'　'+esc(s.name||'（ステップ名未入力）')+wb+(isSp?'<span class="sp-tag">★ 特殊作業</span>':'');
-    blk.appendChild(bh);
+    var hasSp=s.workType.some(function(t){return SPECIAL.indexOf(t)>=0;});
+    var stepRowCount=0;
+    s.contents.forEach(function(c){stepRowCount+=Math.max(1,c.risks.length);});
+    var stepCellBuilt=false;
 
     s.contents.forEach(function(c,ci){
-      var crow=mk('div','risk-cont-row');
-      var ch=mk('div','risk-cont-hdr');
-      ch.appendChild(mk('div','rcno',String(ci+1)));
-      ch.appendChild(mk('span',null,c.name||'（作業内容未入力）'));
-      crow.appendChild(ch);
+      var risksArr=c.risks.length?c.risks:[newR()];
+      risksArr.forEach(function(r,ri){
+        var tr=mk('tr',hasSp?'row-sp':'');
 
-      c.risks.forEach(function(r,ri){
-        var ri_el=mk('div','risk-item');
+        if(!stepCellBuilt){
+          var stepTd=mk('td','td-step');
+          stepTd.rowSpan=stepRowCount;
+          stepTd.appendChild(buildStepCellContent(s,si));
+          tr.appendChild(stepTd);
+          stepCellBuilt=true;
+        }
 
-        // 上段：リスク番号／DBから選ぶ／事故の型／大きさ／発生率／RA評価／削除　を1行に集約
-        var top=mk('div','ri-topbar');
-        var rnum=mk('div','ri-num','リスク '+(ri+1));
-        top.appendChild(rnum);
-        top.appendChild(mkbtn('📚 DBから選ぶ','bg bsm',(function(rref,cref){return function(){openDb(cref.id,rref);};})(r,c)));
+        if(ri===0){
+          var contTd=mk('td','td-cont');
+          contTd.rowSpan=Math.max(1,c.risks.length);
+          contTd.appendChild(buildContCellContent(s,c,ci));
+          tr.appendChild(contTd);
+        }
 
-        var atSel=mk('select','rals');atSel.style.minWidth='150px';
-        atSel.innerHTML='<option value="">事故の型</option>';
-        AT.forEach(function(type){
-          atSel.innerHTML+='<option value="'+esc(type)+'"'+(r.accType===type?' selected':'')+'>'+esc(type)+'</option>';
-        });
-        atSel.addEventListener('change',(function(rref){return function(){rref.accType=this.value;markDirty();};})(r));
-        top.appendChild(atSel);
+        var riskTd=mk('td','td-risk');
+        var riskTa=mk('textarea','fi ta-risk');riskTa.rows=2;riskTa.placeholder='どのような危険があるか';riskTa.value=r.risk;
+        riskTa.addEventListener('input',function(){r.risk=this.value;updBadge();markDirty();});
+        riskTd.appendChild(riskTa);tr.appendChild(riskTd);
 
-        var is=mk('select','rals');is.innerHTML='<option value="">大きさ</option>';
-        INJ.forEach(function(l){is.innerHTML+='<option value="'+l.v+'"'+(r.inj==l.v?' selected':'')+'>'+l.l+'</option>';});
-        is.addEventListener('change',(function(rref){return function(){rref.inj=this.value;renderRisk();markDirty();};})(r));top.appendChild(is);
+        var atTd=mk('td','td-sel');
+        var atSel=mk('select','rals');atSel.innerHTML='<option value="">--</option>';
+        AT.forEach(function(type){atSel.innerHTML+='<option value="'+esc(type)+'"'+(r.accType===type?' selected':'')+'>'+esc(type)+'</option>';});
+        atSel.addEventListener('change',function(){r.accType=this.value;markDirty();});
+        atTd.appendChild(atSel);tr.appendChild(atTd);
 
-        var ps=mk('select','rals');ps.innerHTML='<option value="">発生率</option>';
-        PRB.forEach(function(l){ps.innerHTML+='<option value="'+l.v+'"'+(r.prb===l.v?' selected':'')+'>'+l.l+'</option>';});
-        ps.addEventListener('change',(function(rref){return function(){rref.prb=this.value;renderRisk();markDirty();};})(r));top.appendChild(ps);
+        var injTd=mk('td','td-sel');
+        var injSel=mk('select','rals');injSel.innerHTML='<option value="">-</option>';
+        INJ.forEach(function(l){injSel.innerHTML+='<option value="'+l.v+'"'+(r.inj==l.v?' selected':'')+'>'+l.l+'</option>';});
+        injSel.addEventListener('change',function(){r.inj=this.value;renderTable();markDirty();});
+        injTd.appendChild(injSel);tr.appendChild(injTd);
 
+        var prbTd=mk('td','td-sel');
+        var prbSel=mk('select','rals');prbSel.innerHTML='<option value="">-</option>';
+        PRB.forEach(function(l){prbSel.innerHTML+='<option value="'+l.v+'"'+(r.prb===l.v?' selected':'')+'>'+l.l+'</option>';});
+        prbSel.addEventListener('change',function(){r.prb=this.value;renderTable();markDirty();});
+        prbTd.appendChild(prbSel);
         var ra=calcRA(r.inj,r.prb);
-        top.appendChild(mk('div','rasc',ra.sc!=='-'?ra.sc+'点':'-'));
-        top.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'Lv.'+ra.lv));
+        prbTd.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'Lv.'+ra.lv));
+        tr.appendChild(prbTd);
 
+        var measTd=mk('td','td-meas');
+        var measTa=mk('textarea','fi ta-meas');measTa.rows=2;measTa.placeholder='具体的な対策内容';measTa.value=r.measure;
+        measTa.addEventListener('input',function(){r.measure=this.value;markDirty();});
+        measTd.appendChild(measTa);tr.appendChild(measTd);
+
+        var actTd=mk('td','td-act');
+        var dbBtn=mkbtn('📚','bg bic',(function(rref,cref){return function(){openDb(cref.id,rref);};})(r,c));
+        dbBtn.title='DBから選ぶ';actTd.appendChild(dbBtn);
+        actTd.appendChild(mkMoveBtn('risk',r.id,c.id));
+        actTd.appendChild(mkbtn('＋','bg bic',function(){addR(c.id);}));
         if(c.risks.length>1){
-          var rdel=mkbtn('✕削除','br bsm',function(){delR(c.id,r.id);});
-          rdel.style.marginLeft='auto';
-          top.appendChild(rdel);
+          actTd.appendChild(mkbtn('✕','br bic',function(){delR(c.id,r.id);}));
         }
-        ri_el.appendChild(top);
+        tr.appendChild(actTd);
 
-        // 下段：リスク内容（左）／対策（右）
-        var rrow=mk('div','ri-row');
-        function mkTA(lbl,val,ph,rows,cb,bgColor){
-          var w=mk('div');w.style.cssText='flex:1;min-width:160px;display:flex;flex-direction:column;gap:4px';
-          var l=mk('label',null,lbl);l.style.cssText='font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em';
-          var ta=mk('textarea');ta.className='fi';ta.rows=rows;ta.placeholder=ph;ta.value=val;
-          if(bgColor)ta.style.background=bgColor;
-          ta.addEventListener('input',function(){cb(this.value);updBadge();markDirty();});
-          w.appendChild(l);w.appendChild(ta);return w;
-        }
-        rrow.appendChild(mkTA('🔴 リスク内容',r.risk,'どのような危険があるか',2,function(v){r.risk=v;},'#fff5f5'));
-        rrow.appendChild(mkTA('🟢 リスク低減対策',r.measure,'具体的な対策内容',2,function(v){r.measure=v;},'#f0fff4'));
-        ri_el.appendChild(rrow);
-
-        crow.appendChild(ri_el);
+        tbody.appendChild(tr);
       });
-
-      // ＋リスク追加行
-      var addRow=mk('div','ri-add-row');
-      addRow.appendChild(mkbtn('＋ リスクを追加','bg bsm',function(){addR(c.id);}));
-      crow.appendChild(addRow);
-      blk.appendChild(crow);
     });
-    con.appendChild(blk);
   });
+
+  table.appendChild(tbody);
+  con.appendChild(table);
+  updBadge();
 }
+
 
 // ---------- 転記 ----------
 // ---------- DBモーダル ----------
