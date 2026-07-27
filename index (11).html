@@ -1,0 +1,3955 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作業計画書作成 Web版 v1</title>
+<!-- xlsx生成：ライブラリ不要の純粋JS実装 -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:#eef2f7;color:#1e293b;font-size:14px}
+input,textarea,select,button{font-family:'Noto Sans JP',sans-serif}
+:root{
+  --navy:#1b3a6b;--navy2:#0f2244;--blue:#2563eb;--bl:#dbeafe;
+  --red:#dc2626;--rl:#fee2e2;--org:#ea580c;--ol:#ffedd5;
+  --ylw:#d97706;--yl:#fef3c7;--grn:#16a34a;--gl:#dcfce7;
+  --gray:#64748b;--bdr:#d1d5db;--sh:0 2px 8px rgba(0,0,0,.10);--r:10px;
+}
+/* ヘッダー */
+#hdr{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;padding:0 18px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(0,0,0,.25);height:52px;position:sticky;top:0;z-index:60}
+#hdr h1{font-size:16px;font-weight:900;letter-spacing:.04em;flex:1}
+#hdr h1 span{font-size:11px;font-weight:400;opacity:.65;margin-left:8px}
+.hbtn{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.35);color:#fff;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.hbtn:hover{background:rgba(255,255,255,.28)}
+#save-status{font-size:11px;color:rgba(255,255,255,.75);white-space:nowrap}
+/* タブ */
+#tabs{background:#fff;border-bottom:2px solid var(--bdr);display:flex;padding:0 12px;position:sticky;top:52px;z-index:50;box-shadow:0 2px 4px rgba(0,0,0,.06)}
+.tab{padding:12px 20px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:700;color:var(--gray);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.18s}
+.tab:hover{color:var(--navy)}.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.tbadge{background:var(--red);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;font-weight:900;margin-left:4px}
+/* メイン */
+#main{max-width:960px;margin:0 auto;padding:18px 12px 60px}
+.panel{display:none}.panel.active{display:block}
+/* カード */
+.card{background:#fff;border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin-bottom:14px}
+.card-hd{font-size:14px;font-weight:900;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.card-hd-l{display:flex;align-items:center;gap:7px}
+.card-hd-l::before{content:'';display:block;width:4px;height:17px;background:var(--navy);border-radius:2px}
+/* フォーム */
+.fr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.fr:last-child{margin-bottom:0}
+.fg{display:flex;flex-direction:column;gap:4px;flex:1;min-width:180px}
+.fg-date{flex:0 0 auto;width:150px}
+.fg label{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em}
+input[type="date"].fi{width:150px;min-width:0}
+.fi{padding:7px 10px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;outline:none;transition:.18s;width:100%;background:#fff}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea.fi{resize:vertical;min-height:48px}
+select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px}
+/* ボタン */
+.btn{padding:6px 13px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;transition:.15s;display:inline-flex;align-items:center;gap:5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:not(:disabled):hover{opacity:.82}
+.bn{background:var(--navy);color:#fff}.br{background:var(--red);color:#fff}
+.bg{background:#f1f5f9;color:#334155;border:1.5px solid var(--bdr)}
+.bsm{padding:3px 8px;font-size:11px}.bic{padding:3px 7px;font-size:12px;line-height:1.3}
+/* autocomplete */
+.acw{position:relative}
+.aci{width:100%;padding:7px 10px;border:1.5px solid var(--bdr);border-radius:6px;font-size:13px;outline:none;transition:.18s;background:#fff}
+.aci:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.acd{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--blue);border-top:none;border-radius:0 0 7px 7px;z-index:100;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.aci-item{padding:7px 10px;cursor:pointer;font-size:13px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:7px}
+.aci-item:last-child{border-bottom:none}.aci-item:hover,.aci-item.focused{background:var(--bl)}
+.aci-item span{flex:1}.aci-del{font-size:11px;color:var(--gray);padding:1px 5px;border-radius:3px;flex-shrink:0}
+.aci-del:hover{background:var(--rl);color:var(--red)}
+
+/* ========== タブ①：作業入力 ========== */
+.step-blk{border:2px solid var(--bdr);border-radius:10px;margin-bottom:12px;background:#fff;overflow:hidden}
+.step-blk.sp{border-color:#fbbf24}
+.step-hdr{display:flex;align-items:center;gap:8px;padding:9px 13px;background:#fde8e8;border-bottom:1.5px solid #fca5a5}
+/* ステップ名入力欄：薄赤背景 */
+.step-hdr .aci{background:#fff0f0 !important;border-color:#fca5a5 !important}
+.step-hdr .aci:focus{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(220,38,38,.12) !important}
+.step-no{background:var(--navy);color:#fff;min-width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 2px var(--navy)}
+.step-acts{display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.wtype-row{padding:7px 13px;background:#fafbfc;border-bottom:1.5px solid #f1f5f9}
+.wtype-lbl{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.wtype-btns{display:flex;flex-wrap:wrap;gap:5px}
+.wtb{padding:3px 11px;border-radius:16px;border:1.5px solid var(--bdr);background:#fff;cursor:pointer;font-size:12px;font-weight:700;color:var(--gray);transition:.13s}
+.wtb.s0{background:var(--gl);border-color:#4ade80;color:#166534}
+.wtb.s1{background:var(--rl);border-color:#f87171;color:#991b1b}
+.wtb.s2{background:var(--ol);border-color:#fb923c;color:#9a3412}
+.wtb.s3{background:var(--yl);border-color:#fbbf24;color:#92400e}
+.cont-area{padding:10px 13px}
+.cont-lbl{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+.cont-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #f1f5f9}
+.cont-row:last-of-type{border-bottom:none}
+.cont-no{background:#e2e8f0;color:#475569;min-width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
+.cont-acts{display:flex;gap:3px;flex-shrink:0}
+
+/* ========== タブ②：リスク設定 ========== */
+.risk-blk{border:1.5px solid var(--bdr);border-radius:9px;margin-bottom:12px;background:#fff;overflow:hidden}
+.risk-blk.sp-blk{border-color:#fca5a5}
+.risk-hdr{padding:8px 13px;background:#f8fafc;border-bottom:1px solid var(--bdr);font-size:13px;font-weight:700;color:var(--navy)}
+.risk-hdr .sp-tag{font-size:10px;color:#991b1b;font-weight:900;margin-left:6px}
+.risk-cont-row{border-bottom:1px solid #f1f5f9}
+.risk-cont-row:last-child{border-bottom:none}
+.risk-cont-hdr{display:flex;align-items:center;gap:7px;padding:7px 13px;background:#fafbfd;border-bottom:1px solid #f1f5f9}
+.rcno{background:#e2e8f0;color:#475569;min-width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
+.risk-item{padding:10px 13px 10px 26px;border-bottom:1px dashed #f1f5f9}
+.risk-item:last-child{border-bottom:none}
+.ri-num{font-size:10px;font-weight:700;color:var(--gray);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ri-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+/* 事故の型ラベル */
+.atlb{font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+/* RA */
+.rar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px}
+.rals{padding:4px 7px;border:1.5px solid var(--bdr);border-radius:5px;font-size:12px;background:#fff;outline:none;cursor:pointer}
+.rals:focus{border-color:var(--blue)}
+.rasc{padding:3px 9px;border-radius:5px;font-size:12px;font-weight:900;background:#f1f5f9;color:#334155;min-width:48px;text-align:center}
+.ralv{padding:3px 9px;border-radius:5px;font-size:12px;font-weight:900;min-width:42px;text-align:center}
+/* Lv: Ⅰ=低リスク(緑)→Ⅳ=高リスク(赤) */
+.lv1{background:var(--gl);color:#166534}
+.lv2{background:var(--yl);color:#92400e}
+.lv3{background:var(--ol);color:#9a3412}
+.lv4{background:var(--rl);color:#991b1b}
+/* ステップ交互背景色 */
+.sbg0{background:#f0f7ff}.sbg1{background:#f5f0ff}.sbg2{background:#f0fff8}
+.sbg3{background:#fff8f0}.sbg4{background:#f0faff}.sbg5{background:#fff0f5}
+/* リスク・対策テキストエリア背景 */
+.ta-risk{background:#fff5f5 !important}
+.ta-meas{background:#f0fff4 !important}
+.ri-add-row{padding:8px 13px;display:flex;gap:6px;align-items:center}
+/* アラート */
+.al{padding:9px 13px;border-radius:7px;margin-bottom:11px;font-size:13px;font-weight:500;line-height:1.6}
+.alw{background:var(--yl);color:#78350f;border-left:4px solid #f59e0b}
+.ali{background:var(--bl);color:#1e3a8a;border-left:4px solid var(--blue)}
+.als{background:var(--gl);color:#14532d;border-left:4px solid #16a34a}
+.ald{background:var(--rl);color:#7f1d1d;border-left:4px solid var(--red)}
+.badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:900}
+.bred{background:var(--rl);color:#991b1b}.borg{background:var(--ol);color:#9a3412}.bylw{background:var(--yl);color:#92400e}.bgry{background:#f1f5f9;color:#475569}
+/* モーダル */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.ov.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:22px;width:580px;max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18);animation:su .2s ease}
+@keyframes su{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.mttl{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mft{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:13px;border-top:1px solid var(--bdr)}
+.sttl{font-size:11px;font-weight:900;color:var(--navy);margin:11px 0 5px;padding:4px 9px;background:var(--bl);border-radius:5px}
+.cl{display:flex;flex-direction:column;gap:5px}
+.ci{display:flex;align-items:flex-start;gap:8px;padding:7px 9px;border-radius:6px;border:1.5px solid var(--bdr);cursor:pointer;transition:.13s}
+.ci:hover{background:#f8fafc;border-color:#94a3b8}.ci.ck{background:var(--bl);border-color:#93c5fd}
+.ci input{margin-top:2px;flex-shrink:0;accent-color:var(--blue)}.ci span{font-size:13px;line-height:1.5}
+/* 転記モーダル */
+.copy-item{padding:8px 11px;border:1.5px solid var(--bdr);border-radius:6px;cursor:pointer;margin-bottom:5px;font-size:13px;transition:.13s}
+.copy-item:hover{background:var(--bl);border-color:#93c5fd}
+/* 申請リスト */
+.prow{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border:1.5px solid var(--bdr);border-radius:7px;margin-bottom:7px;background:#fff}
+/* プレビュー */
+#pvwrap{background:#fff;border-radius:var(--r);padding:24px;box-shadow:var(--sh)}
+.pttl{text-align:center;font-size:19px;font-weight:900;color:var(--navy);letter-spacing:.1em;margin-bottom:4px}
+.pbar{width:72px;height:4px;background:var(--navy);margin:0 auto 16px;border-radius:2px}
+.pt{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:11px}
+.pt th,.pt td{border:1px solid #94a3b8;padding:4px 6px;vertical-align:top;text-align:left;word-break:break-all}
+.pt th{background:#e2e8f0;color:#000;font-weight:700}
+.pt tr:nth-child(even) td{background:#f8fafc}
+.psec{font-size:12px;font-weight:900;color:var(--navy);margin:10px 0 5px;padding:4px 9px;background:var(--bl);border-radius:5px}
+@media print{#hdr,#tabs,.no-print{display:none!important}body{background:#fff}#pvwrap{box-shadow:none;padding:7mm}.panel{display:block!important}}
+@media(max-width:600px){
+  #main{padding:9px 6px 60px}
+  .card{padding:12px}
+  .tab{padding:10px 10px;font-size:12px}
+  .fg{min-width:100%}
+}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <h1>🏗️ 作業計画書作成 Web版<span>v1</span></h1>
+  <span id="save-status">●自動保存中</span>
+  <button class="hbtn" id="btn-save-dl">💾 保存</button>
+  <button class="hbtn" id="btn-clear-data">🗑️ クリア</button>
+  <button class="hbtn" id="btn-load-db">📂 DBを読み込む</button>
+  <input type="file" id="db-file-input" accept=".xlsx" style="display:none">
+  <span id="db-status" style="font-size:11px;color:#fff;opacity:.85;margin-right:8px"></span>
+  <button class="hbtn" id="btn-clear-hist">🗑️ 履歴削除</button>
+</div>
+
+<div id="tabs">
+  <button class="tab active" data-tab="tp">📝 ① 作業入力</button>
+  <button class="tab" data-tab="tr">⚠️ ② リスク・対策<span class="tbadge" id="mbadge" style="display:none">!</span></button>
+  <button class="tab" data-tab="tv">📄 ③ プレビュー</button>
+</div>
+
+<div id="main">
+
+  <!-- ① 作業入力 -->
+  <div class="panel active" id="tp">
+    <div class="card">
+      <div class="card-hd"><div class="card-hd-l">基本情報</div></div>
+      <div class="fr">
+        <div class="fg fg-date"><label>作業日</label><input type="date" class="fi" id="f-date"></div>
+        <div class="fg"><label>工事名・作業名 ★</label><input type="text" class="fi" id="f-title" placeholder="例：○○設備 定期点検作業"></div>
+      </div>
+      <div class="fr">
+        <div class="fg">
+          <label>作業場所 ★</label>
+          <div class="acw" id="ac-site-wrap"></div>
+        </div>
+        <div class="fg">
+          <label>工事現場責任者 ★</label>
+          <div class="acw" id="ac-mgr-wrap"></div>
+        </div>
+        <div class="fg">
+          <label>会社名</label>
+          <div class="acw" id="ac-comp-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd">
+        <div class="card-hd-l">作業ステップ・作業内容</div>
+        <button class="btn bn bsm" id="btn-add-step">＋ ステップを追加</button>
+      </div>
+      <div class="al ali" style="font-size:12px;line-height:1.7;margin-bottom:12px">
+        <strong>作業ステップ</strong>：大まかな工程（例：シリンダー整備）　／　
+        <strong>作業内容</strong>：細分された手順（例：取り外し・分解・交換）<br>
+        📌 入力欄クリックで過去の候補が表示されます　／　📋 転記で作業内容名をコピーできます
+      </div>
+      <div id="steps-con"></div>
+    </div>
+  </div>
+
+  <!-- ② リスク・対策 -->
+  <div class="panel" id="tr">
+    <div id="malert"></div>
+    <div id="risk-con"></div>
+  </div>
+
+  <!-- ③ プレビュー -->
+  <div class="panel" id="tv">
+    <div class="no-print" style="display:flex;gap:9px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn bn" id="btn-xlsx">📥 Excelファイルに出力</button>
+      <button class="btn" id="btn-xlsx-pc" style="background:#1e3a5f;color:#fff;">🖥️ 雛形用JSONを出力（PC用）</button>
+      <span style="color:var(--gray);font-size:12px">🖥️ PC用：JSONを出力 → 雛形取込.py で雛形Excelに変換</span>
+    </div>
+    <div id="malert2"></div>
+    <div id="pvwrap"></div>
+  </div>
+</div>
+
+<!-- DBモーダル -->
+<div class="ov" id="db-modal">
+  <div class="modal">
+    <div class="mttl">
+      <span>📚 リスク・対策DB</span>
+      <span style="font-size:11px;font-weight:400;color:var(--gray)" id="db-lbl"></span>
+    </div>
+    <div class="fg" style="margin-bottom:8px"><label>カテゴリを選ぶ（作業種別に連動）</label><select class="fi" id="db-cat"></select></div>
+    <div class="fg" style="margin-bottom:8px" id="db-sub-wrap"><label>サブカテゴリで絞り込む</label><select class="fi" id="db-sub"></select></div>
+    <div id="db-acctype-info" style="font-size:12px;color:var(--gray);margin-bottom:10px;padding:5px 8px;background:#f8fafc;border-radius:5px;display:none"></div>
+    <div class="sttl">リスクを選ぶ（1つ）</div>
+    <div class="cl" id="db-risks"></div>
+    <div class="sttl">対策を選ぶ（複数可）</div>
+    <div class="cl" id="db-meas"></div>
+    <div class="al ali" style="font-size:12px;margin-top:10px;margin-bottom:0" id="db-def-info"></div>
+    <div class="mft">
+      <button class="btn bg" id="db-cancel">キャンセル</button>
+      <button class="btn bn" id="db-ok">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 転記モーダル -->
+<div class="ov" id="copy-modal">
+  <div class="modal">
+    <div class="mttl">📋 作業内容の転記（名前のみコピー）<button class="btn bg bsm" id="copy-close" style="margin-left:auto">✕</button></div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:10px">コピー元を選んでください。作業内容名だけがコピーされます（リスク等は空欄）</div>
+    <div id="copy-list"></div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// ★★★ リスク・対策データベース ★★★
+// ================================================================
+var DB_VERSION = "2026-04-18";
+var RISK_DB = [
+  {
+    "name": "準備作業",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "トラック運搬時、発進時に人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "発進前に進行方向、周囲の目視確認を実施",
+              "作業責任者は運搬前に周辺の安全確認を徹底する。",
+              "作業者は発進前に死角を確認し合図者と連携する。",
+              "監視人は発進時に周囲の作業者へ注意喚起する。",
+              "誘導者は発進時の安全確認を行う。",
+              "作業者は発進時に警告音を鳴らし合図する。"
+            ]
+          },
+          {
+            "risk": "トラック荷下ろし時、足を滑らせ転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "あおりに立たないように周知を行う",
+              "作業責任者は荷下ろし場所の床面状態を事前点検する。",
+              "作業者は滑り止め付き安全靴を着用し荷下ろしする。",
+              "監視人は転倒リスク箇所を作業者へ事前に指示する。",
+              "作業者は荷下ろし作業前に足場の安全を確認する。",
+              "作業者は荷物の安定を確認し慎重に荷下ろしする。"
+            ]
+          },
+          {
+            "risk": "工場内移動時、水で足を滑らせて転倒",
+            "accType": "②転倒",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "移動ルート、足元の確認　※可能ならば水の除去を実施",
+              "作業責任者は床面の清掃と水分除去を実施する。",
+              "作業者は滑り止め付き安全靴を着用する。",
+              "監視人は転倒リスク箇所を事前に点検し周知する。",
+              "作業者は滑りやすい場所を避けて移動する。",
+              "作業者は床面の異常を確認し異常時は改善する。"
+            ]
+          },
+          {
+            "risk": "台車運搬時、材料運搬車と接触",
+            "accType": "⑥激突され",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "通路を渡る際は指差呼称で周囲の目視確認",
+              "作業責任者は台車運搬ルートを事前に確認し区画する。",
+              "作業者は交差点や出入口で一時停止し安全確認する。",
+              "誘導者は台車運搬時に第三者の侵入を防止する。",
+              "作業責任者は誘導者を配置し運搬時の安全を確保する。",
+              "作業者は運搬前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "台車運搬時、台車と制御盤間に手を挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "台車と握り手間に手を入れない。手先の目視確認",
+              "作業責任者は運搬手順を明確にし作業者へ周知する。",
+              "作業者は台車と制御盤間に手を入れず作業する。",
+              "監視人は作業時に手の位置を監視し危険時は即時注意する。",
+              "作業者は指差呼称で危険箇所を確認する。"
+            ]
+          },
+          {
+            "risk": "台車運搬時、第三者に激突する",
+            "accType": "③激突",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "運搬経路の人払いを行い誘導者を配置する",
+              "作業責任者は運搬ルートを明確化し立入禁止措置を実施する。",
+              "作業者は交差点や出入口で一時停止し安全確認する。",
+              "監視人は第三者の侵入を監視し即時注意喚起する。",
+              "誘導者は運搬時に進路の安全を確保する。",
+              "作業責任者は作業前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "台車下ろし時、制御盤と台車間に手足挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "組み作業時、合図応答の実施。手先・足先の目視確認",
+              "作業責任者は下ろし作業手順を作業者へ周知する。",
+              "作業者は手足を制御盤と台車間に入れず作業する。",
+              "監視人は作業時に手足の位置を監視し危険時は即時注意する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "台車下ろし時、転倒し作業者に激突",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "制御盤を必要以上に傾けず指揮者の指示に従う",
+              "作業責任者は制御盤の固定と重心確認を徹底する。",
+              "作業者は転倒防止措置を施し慎重に作業する。",
+              "監視人は作業中に転倒リスクを監視し注意喚起する。",
+              "作業責任者は下ろし作業前に足場の安全を確認する。"
+            ]
+          },
+          {
+            "risk": "工場内移動時、段差でつまずき転倒する。",
+            "accType": "②転倒",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "作業責任者は段差や凹凸箇所を事前に確認し周知する。",
+              "作業者は足元を注視し慎重に歩行する。",
+              "監視人は段差付近での注意喚起や声かけを行う。",
+              "作業責任者は段差箇所にカラーコーンや表示で注意喚起する。",
+              "作業者は滑り止め付き安全靴を着用し歩行する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "一般",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "高温環境下により熱中症になる",
+            "accType": "⑱その他（）",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者はWBGT値を確認し作業時間と休憩を計画する。",
+              "作業責任者はWBGT値に応じて水分・塩分補給を指示する。",
+              "作業者は適切な空調服や冷却ベストを着用し作業する。",
+              "監視人は作業者の体調を定期的に確認し異常時は作業を中断する。",
+              "作業責任者はは熱中症体調管理チェック表を活用する。"
+            ]
+          },
+          {
+            "risk": "移動時に段差につまづき転倒",
+            "accType": "②転倒",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "作業責任者は段差や凹凸箇所を事前に確認し周知する。",
+              "作業者は足元を注視し慎重に歩行する。",
+              "監視人は段差付近での注意喚起や声かけを行う。",
+              "作業責任者は段差箇所にカラーコーンや表示で注意喚起する。",
+              "作業者は滑り止め付き安全靴を着用し歩行する。"
+            ]
+          },
+          {
+            "risk": "共同作業時、合図応答が悪く、手指を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業指揮者を決め合図応答を徹底する。",
+              "作業者は大きな声で明確に合図応答し確認する。",
+              "監視人は合図の実施状況を監督し不備時は即時注意する。",
+              "作業指揮者は作業手順と合図方法を事前に周知する。",
+              "作業者は合図確認後に作業を進める。"
+            ]
+          },
+          {
+            "risk": "工場内移動時、通路に飛び出して動力車と接触",
+            "accType": "⑥激突され",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "通路を渡る前に一旦停止、指差呼称確認実施",
+              "作業責任者は工事エリアを明確化し立入禁止措置を実施する。",
+              "作業者は足型マークで一旦停止し指差呼称で安全確認する。",
+              "監視人は動力車接近時に作業者へ注意喚起を行う。",
+              "作業者は見通しの悪い交差点で速度を落とし徐行する。",
+              "作業者はポケットから手を出して歩行する。"
+            ]
+          },
+          {
+            "risk": "酸欠危険場所作業時、酸素不足で酸欠症",
+            "accType": "⑱その他（）",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "立ち入り前に酸素濃度を測定する(酸素欠乏危険主任者)",
+              "作業者は、酸素欠乏特別教育受講者であること",
+              "作業再開時に酸素濃度を測定する(酸素欠乏危険主任者)",
+              "作業責任者は酸素欠乏危険作業主任者を選任する。",
+              "作業者は特別教育を受けた者を充てる。",
+              "酸素欠乏危険作業主任者は作業開始前に酸素濃度測定を実施する。",
+              "監視人は作業中の状況を監視し異常時は即時作業中断する。",
+              "作業責任者は必要な救助用具を準備する。"
+            ]
+          },
+          {
+            "risk": "資材運搬時、通行者、周囲に接触",
+            "accType": "③激突",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "作業責任者は運搬ルートを明確化し立入禁止措置を実施する。",
+              "作業者は交差点や出入口で一時停止し安全確認する。",
+              "監視人は第三者の侵入を監視し即時注意喚起する。",
+              "誘導者は運搬時に進路の安全を確保する。",
+              "作業責任者は運搬前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "荷物運搬時、周囲の確認不足で、既設物、第3者と接触",
+            "accType": "③激突",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業前に運搬経路と障害物を確認し周知する。",
+              "作業者は運搬時に周囲を注視し徐行して作業する。",
+              "監視人は第三者や既設物への接近を監視し注意喚起する。",
+              "作業責任者は必要に応じて誘導者を配置し安全を確保する。",
+              "作業者は見通しの悪い場所で必ず一時停止し確認する。"
+            ]
+          },
+          {
+            "risk": "中腰作業が続き、腰を痛める。",
+            "accType": "⑱その他（）",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業計画時に適切な休憩時間を設定する。",
+              "作業者は無理な姿勢を避けこまめに姿勢を変える。",
+              "作業責任者は作業台や補助具の使用を推奨する。",
+              "作業者は腰痛予防ベルト等の保護具を着用する。",
+              "作業責任者は作業前に体操やストレッチを指示する。"
+            ]
+          },
+          {
+            "risk": "組付け作業時、工具が合わずスカタンする。",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業前に適切な工具を準備し点検する。",
+              "作業者は工具のサイズ・種類を確認し正しく使用する。",
+              "監視人は誤使用や不適合工具使用を監督し注意喚起する。",
+              "作業者は異常時に作業を中断し上司へ報告する。",
+              "作業責任者は工具の管理番号を明示し管理を徹底する。"
+            ]
+          },
+          {
+            "risk": "他業者と輻輳作業になり、接触激突する。",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は他業者との作業調整会議を実施し作業範囲を明確化する。",
+              "作業者は他業者の作業内容と動線を把握し注意して作業する。",
+              "監視人は輻輳エリアで第三者の動きを監視し注意喚起する。",
+              "作業責任者は作業開始前に現場掲示や打合せで情報を共有する。",
+              "作業者は危険時は作業を中断し指示を仰ぐ。"
+            ]
+          },
+          {
+            "risk": "ジャッキ作業時合図応答確認不足で手足を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業指揮者を決め合図応答を徹底する。",
+              "作業者は手足をジャッキ可動部に入れず作業する。",
+              "監視人は作業時の手足位置を監視し危険時は即時注意する。",
+              "作業指揮者は作業手順と合図方法を事前に周知する。",
+              "作業者は異常時は作業を即時中断し上司へ報告する。"
+            ]
+          },
+          {
+            "risk": "資材運搬時、無理な姿勢で作業し、腰を痛める。",
+            "accType": "⑱その他（）",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業計画時に無理な姿勢が発生しない手順を検討する。",
+              "作業者は腰を曲げず膝を使って資材を持ち上げる。",
+              "監視人は不適切な姿勢を見つけた場合は即時注意する。",
+              "作業者は腰痛予防ベルト等の保護具を着用する。",
+              "作業責任者は必要に応じて補助具や台車の使用を指示する。"
+            ]
+          },
+          {
+            "risk": "足元不注意により、段差に躓きピットへ転落する。",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は段差やピット位置を事前に確認し周知する。",
+              "作業者は足元に注意して歩行しピット付近では慎重に行動する。",
+              "監視人はピット付近で立入禁止措置や注意喚起を行う。",
+              "作業責任者はピット周囲に囲いや表示で注意喚起する。",
+              "作業者は暗い場合は照明を設置し安全確認する。"
+            ]
+          },
+          {
+            "risk": "長物取扱時、周囲の確認不足で既設物、第3者と激突する。",
+            "accType": "③激突",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業責任者は取扱経路と周囲の障害物・第三者を事前に確認する。",
+              "作業者は長物の両端を持ち周囲の安全を確認しながら作業する。",
+              "監視人は第三者や設備への接近を監視し即時注意喚起する。",
+              "作業責任者は必要に応じて誘導者を配置する。",
+              "作業者は見通しの悪い場所で必ず一時停止し安全確認する。"
+            ]
+          },
+          {
+            "risk": "カッター作業時進行方向に遊び手があり手を切る",
+            "accType": "⑨切れこすれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業責任者はレベル3以上の耐切創手袋着用を徹底する。",
+              "作業者はカッターの進行方向に手や身体を置かず作業する。",
+              "作業者はカッター使用前に手袋・保護具の点検を行う。",
+              "監視人は作業中の手の位置と姿勢を監督し危険時は即時注意する。",
+              "作業責任者はカッター使用時の安全手順を作業前に周知する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "化学物質",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "化学物質移し替え時、化学物質が目に入り失明",
+            "accType": "⑬有害物等への接触",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する",
+              "作業責任者は保護メガネ着用を作業者へ周知する。",
+              "作業者はゴーグル形保護メガネを着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業前に保護具の点検を実施する。",
+              "作業責任者はSDSを確認し応急措置を周知する。"
+            ]
+          },
+          {
+            "risk": "化学物質移し替え時、蒸気吸入で気分不良",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "長時間連続作業時や狭隘な場所では防毒マスクを着用する",
+              "作業責任者は換気設備の使用を徹底する。",
+              "作業者は防毒マスクを正しく着用し作業する。",
+              "監視人は換気状態と保護具着用を監視する。",
+              "作業責任者は作業前にSDSを確認しリスクを周知する。",
+              "作業者は異常時に速やかに報告し退避する。"
+            ]
+          },
+          {
+            "risk": "化学物質移し替え時、皮膚障害",
+            "accType": "⑬有害物等への接触",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "ニトリルゴム製の手袋を着用する",
+              "作業責任者はSDSを確認し保護具着用を周知する。",
+              "作業者はゴム手袋・保護衣を着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業後に手洗い等を徹底する。",
+              "作業責任者は作業前に保護具の点検を行う。"
+            ]
+          },
+          {
+            "risk": "接着作業時、化学物質が目に入り失明",
+            "accType": "⑬有害物等への接触",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する",
+              "作業責任者は保護メガネ着用を作業者へ周知する。",
+              "作業者はゴーグル形保護メガネを着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業前に保護具の点検を実施する。",
+              "作業責任者はSDSを確認し応急措置を周知する。"
+            ]
+          },
+          {
+            "risk": "接着作業時、化学物質で皮膚障害",
+            "accType": "⑬有害物等への接触",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "ニトリルゴム製の手袋を着用する",
+              "作業責任者はSDSを確認し保護具着用を周知する。",
+              "作業者はゴム手袋・保護衣を着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業後に手洗い等を徹底する。",
+              "作業責任者は作業前に保護具の点検を行う。"
+            ]
+          },
+          {
+            "risk": "接着作業時、蒸気吸入で気分不良",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "長時間連続作業時や狭隘な場所では防毒マスクを着用する",
+              "作業責任者は換気設備の使用と防毒マスク着用を周知する。",
+              "作業者は防毒マスクを正しく着用し作業する。",
+              "監視人は換気状態と保護具着用を監視する。",
+              "作業責任者は作業前にSDSを確認しリスクを周知する。",
+              "作業者は長時間作業を避け適宜休憩を取る。"
+            ]
+          },
+          {
+            "risk": "洗浄攪拌作業時、化学物質が目に入り失明",
+            "accType": "⑬有害物等への接触",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する",
+              "作業責任者は保護メガネ着用を作業者へ周知する。",
+              "作業者はゴーグル形保護メガネを着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業前に保護具の点検を実施する。",
+              "作業責任者はSDSを確認し応急措置を周知する。"
+            ]
+          },
+          {
+            "risk": "洗浄攪拌作業時、化学物質で皮膚障害",
+            "accType": "⑬有害物等への接触",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "ニトリルゴム製の手袋を着用する",
+              "作業責任者はSDSを確認し保護具着用を周知する。",
+              "作業者はゴム手袋・保護衣を着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業後に手洗い等を徹底する。",
+              "作業責任者は作業前に保護具の点検を行う。"
+            ]
+          },
+          {
+            "risk": "洗浄攪拌作業時、蒸気吸入で気分不良",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "長時間連続作業時や狭隘な場所では防毒マスクを着用する",
+              "作業責任者は換気設備の使用を徹底する。",
+              "作業者は防毒マスクを正しく着用し作業する。",
+              "監視人は換気状態と保護具着用を監視する。",
+              "作業責任者は作業前にSDSを確認しリスクを周知する。",
+              "作業者は異常時に速やかに報告し退避する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "塗装",
+        "items": [
+          {
+            "risk": "塗装作業時、塗料が皮膚に付き皮膚障害",
+            "accType": "⑬有害物等への接触",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "ニトリルゴム製の手袋を着用する",
+              "作業責任者はSDSを確認し保護具着用を周知する。",
+              "作業者はゴム手袋・保護衣を着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業後に手洗い等を徹底する。",
+              "作業責任者は作業前に保護具の点検を行う。"
+            ]
+          },
+          {
+            "risk": "塗装作業時、塗料が目に入り失明",
+            "accType": "⑬有害物等への接触",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する、上向きな場合はサイドシールド付き",
+              "作業責任者は保護メガネ着用を作業者へ周知する。",
+              "作業者はゴーグル形保護メガネを着用し作業する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業前に保護具の点検を実施する。",
+              "作業責任者はSDSを確認し応急措置を周知する。"
+            ]
+          },
+          {
+            "risk": "塗装作業時、塗料蒸気吸入で気分不良",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "長時間連続作業時や狭隘な場所では防毒マスクを着用する",
+              "作業責任者は換気設備の使用と防毒マスク着用を周知する。",
+              "作業者は防毒マスクを正しく着用し作業する。",
+              "監視人は換気状態と保護具着用を監視する。",
+              "作業責任者は作業前にSDSを確認しリスクを周知する。",
+              "作業者は長時間作業を避け適宜休憩を取る。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "火気作業",
+    "subs": [
+      {
+        "name": "ガス溶断",
+        "items": [
+          {
+            "risk": "ガス溶接溶断作業時、ガス漏れで爆発",
+            "accType": "⑮爆発・火災",
+            "inj": 3,
+            "prb": "C",
+            "measures": [
+              "ホース、接手部の漏れ点検実施",
+              "作業責任者は作業前にホース・バルブ等の漏れ点検を徹底する。",
+              "作業者は石鹸水でガス漏れ確認を実施し異常時は作業を中止する。",
+              "監視人は作業中の異臭や漏れ音を監視し異常時は即時報告する。",
+              "作業責任者は火気使用許可を取得し安全対策を周知する。",
+              "作業者はボンベを立てて固定し安全に作業する。"
+            ]
+          },
+          {
+            "risk": "ガス溶接溶断作業時、火花飛散で火災",
+            "accType": "⑮爆発・火災",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "BS火気使用ルールの徹底(火気監視人の専任)",
+              "作業責任者は火気使用箇所の可燃物を除去する。",
+              "作業者は防炎シートや火花受けで周囲を防護する。",
+              "火気監視人は火花飛散範囲を監視し即時消火対応する。",
+              "作業責任者は消火器・水バケツ等の消火設備を準備する。",
+              "火気監視人は、残火確認を30分以上行う"
+            ]
+          },
+          {
+            "risk": "ガス溶接溶断作業時、火花飛散で火傷",
+            "accType": "⑫高温・低温物との接触",
+            "inj": 2,
+            "prb": "C",
+            "measures": [
+              "長袖作業服と保護具を着用する",
+              "作業責任者は溶接用保護具着用を徹底する。",
+              "作業者は皮手袋・前掛等を着用し作業する。",
+              "監視人は作業中の保護具着用状況を確認し注意喚起する。",
+              "作業責任者は火気使用ルールを作業者へ周知する。",
+              "作業者は火傷リスク箇所を事前に確認し作業する。"
+            ]
+          },
+          {
+            "risk": "ガス溶接溶断作業時、有害ヒューム吸入で中毒",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "C",
+            "measures": [
+              "換気を行い、防塵マスクを着用する",
+              "作業責任者は防毒マスクや換気設備の使用を作業者へ周知する。",
+              "作業者は防毒マスクを正しく着用し作業する。",
+              "監視人は作業場所の換気状態を監視し異常時は即時注意する。",
+              "作業責任者は作業前にSDSを確認しリスクを周知する。",
+              "作業者はヒューム発生源から離れて作業する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "グラインダー",
+        "items": [
+          {
+            "risk": "ディスクグラインダーケレン時、ディスク弾かれ擦り傷",
+            "accType": "⑨切れこすれ",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "両手で支えて作業する",
+              "作業責任者は補助ハンドル付グラインダーの使用を周知する。",
+              "作業者は両手でしっかり保持し作業する。",
+              "監視人は作業時の姿勢や保持状況を監視し注意喚起する。",
+              "作業者は切断砥石専用カバーを装着して作業する。"
+            ]
+          },
+          {
+            "risk": "ディスクグラインダーケレン時、火花飛散で火災",
+            "accType": "⑮爆発・火災",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "BS火気使用ルールの徹底(火気監視人の専任)",
+              "作業責任者は作業前に周囲の可燃物を除去する。",
+              "作業者は防炎シートや火花受けで周囲を防護する。",
+              "火気監視人は火花飛散範囲を監視し即時消火対応する。",
+              "作業責任者は消火器・水バケツ等の消火設備を準備する。",
+              "火気監視人は、残火確認を30分以上行う"
+            ]
+          },
+          {
+            "risk": "ディスクグラインダーケレン時、粉塵が目に入る",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する",
+              "作業責任者は保護メガネ・防塵マスク着用を周知する。",
+              "作業者はゴーグル形保護メガネと防塵マスクを着用する。",
+              "監視人は保護具着用状況を確認し注意喚起する。",
+              "作業者は作業前に保護具の点検を実施する。"
+            ]
+          },
+          {
+            "risk": "ディスクグラインダーケレン時、粉塵で異物入り",
+            "accType": "⑮爆発・火災",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "周囲の養生実施と適度な散水の実施",
+              "作業責任者は作業場所に間仕切りや養生を設置し粉塵拡散を防止する。",
+              "作業者は集塵機や掃除機を使用し作業中の粉塵を除去する。",
+              "監視人は製品付近での作業を避けるよう指示し監督する。",
+              "作業責任者は作業後に製品への付着粉塵を清掃する。",
+              "作業者は作業前に製品をカバーやシートで養生する。"
+            ]
+          },
+          {
+            "risk": "ディスクグラインダー作業時、砥石が割れて破片が目に入る",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "保護眼鏡を着用する",
+              "作業責任者は使用前に砥石の点検と試運転を徹底する。",
+              "作業者は保護メガネ・防塵マスクを必ず着用する。",
+              "監視人は作業中の保護具着用状況を確認し注意喚起する。",
+              "作業者は砥石交換時は電源を切りコンセントを抜く。",
+              "作業者はグラインダーの正面に立たず作業する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "溶接",
+        "items": [
+          {
+            "risk": "溶接作業時、ヒューム吸入でじん肺",
+            "accType": "⑬有害物等への接触",
+            "inj": 2,
+            "prb": "C",
+            "measures": [
+              "換気を行い、防塵マスクを着用する",
+              "作業責任者は防塵マスクの着用を作業者へ周知する。",
+              "作業者は国家検定品の防塵マスクを正しく着用する。",
+              "監視人は作業時の換気状態とマスク着用状況を監視する。",
+              "作業責任者は溶接場所の換気設備を点検し作業開始する。",
+              "作業者はヒューム発生源から離れて作業する。"
+            ]
+          },
+          {
+            "risk": "溶接作業時、火花飛散で火災",
+            "accType": "⑮爆発・火災",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "BS火気使用ルールの徹底(火気監視人の専任)",
+              "作業責任者は火気使用箇所の可燃物を除去する。",
+              "作業者は防炎シートや火花受けで周囲を防護する。",
+              "火気監視人は火花飛散範囲を監視し即時消火対応する。",
+              "作業責任者は消火器・水バケツ等の消火設備を準備する。",
+              "火気監視人は、残火確認を30分以上行う"
+            ]
+          },
+          {
+            "risk": "溶接作業時、火花飛散で火傷",
+            "accType": "⑫高温・低温物との接触",
+            "inj": 2,
+            "prb": "C",
+            "measures": [
+              "長袖作業服と保護具を着用する",
+              "作業責任者は溶接用保護具着用を徹底する。",
+              "作業者は溶接用皮手袋・前掛等を着用し作業する。",
+              "監視人は作業中の保護具着用状況を監視し注意喚起する。",
+              "作業責任者は火気使用ルールを作業者へ周知する。",
+              "作業者は火傷リスク箇所を事前に確認し作業する。"
+            ]
+          },
+          {
+            "risk": "溶接作業時、充電部に触れ感電",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "絶縁性の手袋を着用する",
+              "作業責任者は作業前に溶接機具の点検を徹底する。",
+              "作業者は絶縁用具・保護具を正しく着用し作業する。",
+              "監視人は作業中の安全装置やLOTOの有無を確認する。",
+              "作業責任者は作業開始前に作業手順と危険箇所を周知する。",
+              "作業者は濡れた手や服装で作業しない。"
+            ]
+          },
+          {
+            "risk": "溶接作業時、排気充満で一酸化炭素中毒",
+            "accType": "⑱その他（）",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "閉所に設置しない、閉所設置時は換気を行う",
+              "作業責任者は換気設備の作動を点検し十分な換気を確保する。",
+              "作業者は作業中に異臭・気分不良を感じたら直ちに報告し退避する。",
+              "監視人は作業場所の換気状態を監視し異常時は即時作業中断する。",
+              "作業責任者は作業前に酸素濃度計で測定し安全を確認する。",
+              "作業者は閉鎖空間での単独作業を行わない。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "高重心物",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "制御盤を台車に載せ時、転倒し作業者に激突",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "制御盤を必要以上に傾けず指揮者の指示に従う",
+              "作業責任者は制御盤の固定と重心確認を徹底する。",
+              "作業者は転倒防止措置を施し慎重に作業する。",
+              "監視人は作業中に転倒リスクを常時監視し注意喚起する。",
+              "作業責任者は作業前に運搬ルートと作業環境を確認する。"
+            ]
+          },
+          {
+            "risk": "制御盤運搬時に転倒し作業者に激突し床面と挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "運搬具と制御盤を固定または固縛する",
+              "運搬経路の段差を確認して段差は養生を実施する",
+              "作業責任者は制御盤の固定と重心確認を徹底する。",
+              "作業者は転倒防止措置を施し慎重に運搬する。",
+              "監視人は作業中に転倒リスクを常時監視し注意喚起する。",
+              "作業責任者は運搬前に運搬ルートと作業環境を確認する。",
+              "誘導者は運搬時の進路を確保し第三者の侵入を防止する。"
+            ]
+          },
+          {
+            "risk": "高重心物取り扱い時にバランスが崩れ作業者と激突する",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "組み作業時、合図応答の実施。手先・足先の目視確認",
+              "作業責任者は転倒防止措置を行うよう指示を出す",
+              "作業者は手足を高重心物の間に入れず作業する。",
+              "監視人は作業時に手足の位置を監視し危険時は即時注意する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "高重心物取り扱い時にバランスが崩れ手足挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "高重心物を必要以上に傾けず指揮者の指示に従う",
+              "作業責任者は高重心物の固定と運搬ルートを確認する。",
+              "作業責任者は転倒防止措置を行うよう指示を出す",
+              "監視人は作業中に転倒リスクを監視し注意喚起する。",
+              "誘導者は運搬時の進路の安全を確保する。"
+            ]
+          },
+          {
+            "risk": "高重心物取り扱い時、転倒し作業者と床面に挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "運搬経路の人払いを行い誘導者を配置する",
+              "作業責任者は運搬ルートを明確化し立入禁止措置を実施する。",
+              "作業者は交差点や出入口で一時停止し安全確認する。",
+              "監視人は第三者の侵入を監視し即時注意喚起する。",
+              "誘導者は進路の安全を確保する。"
+            ]
+          },
+          {
+            "risk": "高重心物取り扱い時、転倒し作業者に激突",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "高重心物を必要以上に傾けず指揮者の指示に従う",
+              "運搬経路に段差・傾斜無き事。誘導者の配置",
+              "手押し時は、重心より低い位置を押すこと",
+              "作業責任者は制御盤の固定と運搬ルートを確認する。",
+              "作業責任者は転倒防止措置を行うよう指示を出す",
+              "監視人は作業中に転倒リスクを監視し注意喚起する。",
+              "誘導者は運搬時の進路の安全を確保する。"
+            ]
+          },
+          {
+            "risk": "制御盤取り扱い時に転倒し作業者に激突し床面と挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "制御盤を必要以上に傾けず指揮者の指示に従う",
+              "作業責任者は制御盤の固定と運搬ルートを確認する。",
+              "作業責任者は転倒防止措置を行うよう指示を出す",
+              "監視人は作業中に転倒リスクを監視し注意喚起する。",
+              "誘導者は運搬時の進路の安全を確保する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "高所作業",
+    "subs": [
+      {
+        "name": "作業台",
+        "items": [
+          {
+            "risk": "可搬式作業台使用時、バランス崩し転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "周囲の構造物等に固定し転倒防止措置を行う",
+              "転倒防止措置が出来ない場合は2人作業禁止",
+              "頭以上の高さにフックが掛けられる場合は、墜落制止用器具のフックを掛ける",
+              "作業責任者は作業台の設置状況と点検を徹底する。",
+              "作業者は天板の上で不安定な姿勢をとらず作業する。",
+              "監視人は作業中の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し作業台を支えさせる。",
+              "作業者は天板上で踏み台等を使用しない。"
+            ]
+          },
+          {
+            "risk": "可搬式作業台使用時、昇降時に足踏み外し転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "3点支持にて昇降する",
+              "作業責任者は作業台の点検と設置状況を確認する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し作業台を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          },
+          {
+            "risk": "可搬式作業台組立時、第三者に激突",
+            "accType": "③激突",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "取り回し時は、周囲を目視確認する",
+              "作業責任者は作業台の設置場所と運搬ルートを明確化する。",
+              "作業者は運搬時に周囲の安全を確認する。",
+              "監視人は第三者の接近を監視し注意喚起する。",
+              "作業者は合図を出してから作業台を移動する。",
+              "作業責任者は作業前に周囲の安全確認を徹底する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "屋根上・開口部",
+        "items": [
+          {
+            "risk": "屋根上移動時、避雷針や凹凸で転倒",
+            "accType": "②転倒",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "移動ルート、足元を目視確認して移動する",
+              "作業責任者は屋根上の歩行ルート・障害物を事前確認する。",
+              "作業者は歩行時に足元と障害物を確認し慎重に移動する。",
+              "監視人は作業中の歩行ルートを監視し危険時は即時注意する。",
+              "作業責任者は作業前に屋根上の安全設備を点検する。",
+              "作業者は滑り止め付き安全靴を着用する。"
+            ]
+          },
+          {
+            "risk": "屋根端部作業時、端部より足を踏み外し転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "端部から1m以上離れる、近づく際は墜落静止用器具を使用",
+              "※フックを掛ける場所がない場合は、親綱を設置する",
+              "作業責任者は屋根端部に親綱と墜落制止用器具を設置する。",
+              "作業者は屋根端部で背を向けず慎重に作業する。",
+              "監視人は端部作業時に作業者の位置を監視し注意喚起する。",
+              "作業責任者は作業前に端部の危険箇所を周知する。",
+              "作業者は安全柵や歩み板を利用して作業する。"
+            ]
+          },
+          {
+            "risk": "高所作業、開口部で足を踏み外し落下",
+            "accType": "①墜落・転落",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "親綱を設置して墜落制止用器具のフックを掛ける",
+              "端部に近づき過ぎない(可能なら1m以上離れる)",
+              "作業責任者は開口部の囲い・手摺・覆い設置を徹底する。",
+              "作業者は開口部付近では墜落制止用器具を使用する。",
+              "監視人は作業中の開口部周囲を監視し立入禁止措置を講じる。",
+              "作業責任者は作業前に開口部の点検と危険箇所の周知を行う。",
+              "作業者は暗い場合は適切な照明を設置して作業する。"
+            ]
+          },
+          {
+            "risk": "高所作業、足を滑らせ落下・転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "安全帯のフックを丈夫な構造体に掛けて作業する",
+              "作業責任者は作業床や足場の設置状況を事前に確認する。",
+              "作業者は滑り止め付き安全靴を着用し慎重に作業する。",
+              "監視人は作業中の足元や動線を監視し危険時は即時注意する。",
+              "作業責任者は作業前に足場や床面の清掃を徹底する。",
+              "作業者は三点支持で昇降や移動を行う。"
+            ]
+          },
+          {
+            "risk": "高所作業、5m以上の開口部で足を踏み外し落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "親綱を設置して墜落制止用器具のフックを掛ける",
+              "端部に近づき過ぎない(可能なら1m以上離れる)",
+              "作業責任者はフルハーネス型墜落制止用器具の使用を徹底する。",
+              "作業者は開口部付近では墜落制止用器具を使用する。",
+              "監視人は作業中の開口部周囲を監視し立入禁止措置を講じる。",
+              "作業責任者は作業前に開口部の点検と危険箇所の周知を行う。",
+              "作業者は昇降設備や安全ネットを利用して作業する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "梯子",
+        "items": [
+          {
+            "risk": "既設梯子昇降時、桟を踏み外して転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "3点支持にて昇降、セーフティーブロックを使用する",
+              "作業責任者は梯子の点検と設置状況を確認する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し梯子を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          },
+          {
+            "risk": "梯子運搬時、方向転換で人にぶつける",
+            "accType": "③激突",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "取り回し時は、周囲を目視確認する",
+              "作業責任者は運搬ルートを明確化し立入禁止措置を実施する。",
+              "作業者は方向転換時に周囲の安全を確認する。",
+              "監視人は第三者の接近を監視し注意喚起する。",
+              "作業者は合図を出してから方向転換を行う。",
+              "作業責任者は作業前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "梯子昇降時、桟を踏み外して転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "3点支持にて昇降、セーフティーブロックを使用する",
+              "作業責任者は昇降設備の点検を作業前に実施する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し脚立を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          },
+          {
+            "risk": "梯子昇降時、反動で梯子がずれて転倒",
+            "accType": "⑤崩壊・倒壊",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "支える人を配置、先端部の固定を実施する",
+              "作業責任者は設置場所の安定と脚部の滑り止め確認を徹底する。",
+              "作業者は昇降時に急な動作を避け慎重に昇降する。",
+              "監視人は昇降時の梯子の状態を監視し異常時は即時注意する。",
+              "作業者は補助者に梯子を支えさせる。",
+              "作業責任者は設置角度を適正に保つよう指示する。"
+            ]
+          },
+          {
+            "risk": "梯子設置時、引き紐から手が滑り手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "可動部（挟まれ個所）に手を置かない",
+              "作業責任者は設置手順を明確にし作業者へ周知する。",
+              "作業者は手を引き紐から離さず慎重に設置する。",
+              "監視人は設置時の手の位置を監視し危険時は即時注意する。",
+              "作業者は保護手袋を着用して作業する。",
+              "作業者は設置前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "梯子設置時、昇降時に梯子がたわむ",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "梯子の立てかけ角度は75度以上とする",
+              "作業責任者は認定品の使用と外観点検を徹底する。",
+              "作業者は昇降前に梯子の安定・設置角度を確認する。",
+              "監視人は昇降時の梯子の状態を監視し異常時は即時注意する。",
+              "作業者は脚部の滑り止めを確認し設置する。",
+              "作業者は脚立の開き止め金具を確実にロックする。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "脚立",
+        "items": [
+          {
+            "risk": "脚立作業時、バランス崩し転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "1.5m以上の作業は補助者が脚立を支える",
+              "天板を跨がない、天板の上に載らない",
+              "頭以上の高さにフックが掛けられる場合は、墜落制止用器具のフックを掛ける",
+              "作業責任者は脚立の設置状況と点検を徹底する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し脚立を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          },
+          {
+            "risk": "脚立作業時、運搬設置時に第三者に激突",
+            "accType": "③激突",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "取り回し時は、周囲を目視確認する",
+              "作業責任者は運搬ルートを明確化し立入禁止措置を実施する。",
+              "作業者は運搬時に周囲の安全を確認する。",
+              "監視人は第三者の接近を監視し注意喚起する。",
+              "作業者は合図を出してから方向転換を行う。",
+              "作業責任者は作業前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "脚立作業時、昇降時に足踏み外し転落",
+            "accType": "①墜落・転落",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "3点支持にて昇降する",
+              "作業責任者は脚立の点検と設置状況を確認する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し脚立を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "足場",
+        "items": [
+          {
+            "risk": "組立足場作業時、工具等落下し下の人に当たる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "C",
+            "measures": [
+              "エリア区画を行い、人払いを実施する",
+              "作業責任者は落下防止措置と立入禁止措置を徹底する。",
+              "作業者は工具等を落下防止用具で管理する。",
+              "監視人は下部の立入禁止措置を徹底する。",
+              "作業者は落下防止用袋等を使用し管理する。",
+              "作業責任者は作業前に落下リスク箇所を点検する。"
+            ]
+          },
+          {
+            "risk": "組立足場作業時、柵外に身を乗り出し転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業前に、墜落制止静止用器具のフックを掛ける",
+              "作業責任者は身乗り出し禁止を作業者へ周知する。",
+              "監視人は作業者の作業姿勢を監視し注意喚起する。",
+              "作業者は足場柵内で作業し身を乗り出さない。",
+              "作業責任者は作業開始前に安全教育を実施する。",
+              "作業者は墜落制止用器具を正しく使用する。"
+            ]
+          },
+          {
+            "risk": "組立足場作業時、梯子の桟を踏み外して転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "3点支持にて昇降、セーフティーブロックを使用する",
+              "作業責任者は昇降設備の点検を作業前に実施する。",
+              "作業者は3点支持で昇降し慎重に作業する。",
+              "監視人は昇降時の作業者の動きを監視し注意喚起する。",
+              "作業責任者は補助者を配置し脚立を支えさせる。",
+              "作業者は損傷や腐食のない認定品を使用する。"
+            ]
+          },
+          {
+            "risk": "足場材受け渡し時、落下させ身体にあたる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "合図応答確認を行い作業実施",
+              "作業責任者は足場材受け渡し手順を作業者へ周知する。",
+              "作業者は足場材をしっかり持ち確実に受け渡しする。",
+              "監視人は受け渡し時の周囲状況を監視し注意喚起する。",
+              "作業者は受け渡し前に声掛けし合図を確認する。",
+              "作業責任者は作業前に足場材の点検を行う。"
+            ]
+          },
+          {
+            "risk": "足場組立解体時、工具材料落下し下の人に当たる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "エリア区画を行い、上下作業にならないように調整する",
+              "作業責任者は落下防止措置と立入禁止措置を徹底する。",
+              "作業者は工具・材料を落下防止用具で管理する。",
+              "監視人は下部の立入禁止措置を徹底する。",
+              "作業者は落下防止用袋等を使用し管理する。",
+              "作業責任者は作業前に落下リスク箇所を点検する。"
+            ]
+          },
+          {
+            "risk": "足場組立解体時、足場から踏み外して落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "2丁掛けの墜落静止用器具を使用しフックを掛ける",
+              "手摺先行組み立て工法の徹底",
+              "親綱を設置し墜落制止用器具のフックを掛ける",
+              "作業責任者は監視人を配置し立入禁止措置を実施する。",
+              "作業主任者は足場の点検と異常時の補修を徹底する。",
+              "作業者はヘルメット・墜落制止用器具を着用する。",
+              "監視人は作業開始前に手摺・幅木等の点検を実施する。",
+              "作業指揮者は合図応答を確認しながら作業を進める。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "高所作業車",
+        "items": [
+          {
+            "risk": "高所作業車使用時、バケットから身を乗り出して落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "バケットを身を乗り出さない位置へ移動、墜落静止用器具を使用",
+              "作業責任者はバケットからの身乗り出し禁止を周知する。",
+              "作業者は作業床内から身を乗り出さず作業する。",
+              "監視人は作業床内の作業姿勢を監視し注意喚起する。",
+              "作業者は墜落制止用器具を正しく使用する。",
+              "作業責任者は作業開始前に安全教育を実施する。"
+            ]
+          },
+          {
+            "risk": "高所作業時、工具材料落下し下の人に当たる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業エリアを区画して、人払い実施",
+              "作業責任者は工具・材料の落下防止措置を周知徹底する。",
+              "作業者は工具・材料をロープ等で確実に固定する。",
+              "監視人は作業エリア下部の立入禁止措置を徹底する。",
+              "作業者は落下防止用袋等を使用し管理する。",
+              "作業責任者は作業前に落下リスク箇所を点検する。"
+            ]
+          },
+          {
+            "risk": "高所作業車アウトリガーセット時、手足を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "アウトリガーを動かす前に合図応答確認実施",
+              "作業責任者はアウトリガー操作手順を作業者へ周知する。",
+              "作業者は手足をアウトリガーの可動範囲に置かず操作する。",
+              "監視人は操作時の手足位置を確認し危険時は即時注意する。",
+              "作業者は操作前に周囲の安全確認を徹底する。",
+              "作業責任者は異常時は作業を中断し指示を行う。"
+            ]
+          },
+          {
+            "risk": "高所作業車旋回昇降時、手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "柵の外側に手、体を出さない",
+              "作業責任者は作業手順を明確にし作業者へ周知する。",
+              "作業者は可動部に手を置かずに操作する。",
+              "監視人は作業時に手の位置を監視し危険時は即時注意する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。",
+              "作業責任者は作業開始前に異常確認を行う。"
+            ]
+          },
+          {
+            "risk": "高所作業車旋回昇降時、投げ出され落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "バケット内では常に墜落静止用器具を使用する",
+              "作業責任者は作業床内での墜落制止用器具使用を徹底する。",
+              "作業者はフルハーネス型墜落制止用器具を着用する。",
+              "監視人は作業床内での安全帯使用状況を確認する。",
+              "作業責任者は作業開始前に安全設備の点検を実施する。",
+              "作業者は作業床内から身を乗り出さず作業する。"
+            ]
+          },
+          {
+            "risk": "高所作業車走行時、発進時に人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "発進前に進行方向、周囲の確認を実施",
+              "作業責任者は発進前に周囲の安全確認を徹底する。",
+              "作業者は発進時に警告音を鳴らし合図する。",
+              "誘導者は発進時に周囲の作業者へ注意喚起し誘導する。",
+              "監視人は第三者の接近を監視し注意喚起する。",
+              "作業責任者は誘導者を配置し進路の安全を確保する。"
+            ]
+          },
+          {
+            "risk": "垂直式高所作業時、工具材料落下し下の人に当たる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "作業エリアを区画して、人払い実施",
+              "作業責任者は落下防止措置を計画し周知する。",
+              "作業者は工具・材料を落下防止用具で管理する。",
+              "監視人は作業エリア下部の立入禁止措置を徹底する。",
+              "作業者は落下防止用袋等を使用し管理する。",
+              "作業責任者は作業前に落下リスク箇所を点検する。"
+            ]
+          },
+          {
+            "risk": "垂直式高所作業車昇降時、可動部で手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "操作前に人払いを行い、人がいないことを確認する",
+              "作業責任者は作業手順を明確にし作業者へ周知する。",
+              "作業者は可動部に手を置かずに操作する。",
+              "監視人は作業時に手の位置を監視し危険時は即時注意する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "垂直式高所作業車昇降時、手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "柵の外側に手、体を出さない。操作時は移動先を目視確認",
+              "作業責任者は昇降操作時の危険箇所を周知する。",
+              "作業者は手を可動部に近づけず昇降操作を行う。",
+              "監視人は昇降時の手の位置を監視し危険時は即時注意する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "垂直式高所作業車走行時、発進時に人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "発進前に進行方向、周囲の確認を実施",
+              "作業責任者は発進前に周囲の安全確認を徹底する。",
+              "作業者は発進時に警告音を鳴らし合図する。",
+              "誘導者は発進時に周囲の作業者へ注意喚起し誘導する。",
+              "監視人は第三者の接近を監視し注意喚起する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "重機・クレーン",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "アウトリガーセット時、手足を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "アウトリガーを動かす前に合図応答確認実施",
+              "作業責任者はアウトリガー操作手順を作業者へ周知する。",
+              "作業者は手足をアウトリガーの可動範囲に置かず操作する。",
+              "監視人は操作時の手足位置を確認し危険時は即時注意する。",
+              "作業者は操作前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "クレーンフック下降時、頭にぶつかる",
+            "accType": "③激突",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "目視確認後操作開始、死角がある際は合図者を配置",
+              "作業責任者は作業前にフック下降範囲を明確にし周知する。",
+              "作業者はフック下降時に頭上安全を確認し離れて作業する。",
+              "監視人はフック下降時に作業者の位置を監視し危険時は即時注意する。",
+              "作業責任者は作業前に作業手順を周知し危険箇所を確認する。"
+            ]
+          },
+          {
+            "risk": "クレーン操作時、ブーム動作範囲で人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "動作範囲に人がいないことを、目視確認し操作を行う",
+              "作業責任者は作業前に立入禁止範囲を明確にし周知する。",
+              "作業者はブーム動作範囲内に立ち入らず作業する。",
+              "監視人はブーム動作範囲を監視し第三者の侵入を防止する。",
+              "作業責任者は作業開始前に作業手順と合図方法を周知する。"
+            ]
+          },
+          {
+            "risk": "移動式クレーン走行時、発進時に人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "発進前に進行方向、周囲の確認を実施、誘導者配置",
+              "作業責任者は発進前に周囲の安全確認を徹底する。",
+              "作業者は発進時に誘導者の合図に従い走行する。",
+              "誘導者は発進時に第三者の排除と安全確認を行う。",
+              "作業責任者は誘導者を配置し走行時の進路を確保する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "フォークリフト",
+        "items": [
+          {
+            "risk": "フォークリフト運搬時、荷と壁間で挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "移動方向を目視確認して操作実施",
+              "作業責任者は運搬経路の壁際作業禁止を徹底する。",
+              "作業者は壁際運搬時に誘導者の指示に従い距離を保つ。",
+              "誘導者は壁際での作業時に作業者の位置を確認し誘導する。",
+              "作業責任者は壁際作業時に立ち会い安全を確認する。",
+              "作業者は荷の進行方向に立ち入らないよう注意する。"
+            ]
+          },
+          {
+            "risk": "フォークリフト運搬時、荷物落下で歩行者に激突",
+            "accType": "④飛来・落下",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "急旋回をしない、荷が不安定な場合は固縛を実施",
+              "作業責任者は荷物の固縛と安定確認を徹底する。",
+              "作業者は荷物の落下防止策を実施し運搬する。",
+              "監視人は歩行者の進路を監視し接近時は即時注意する。",
+              "誘導者は進路の安全を確保する。",
+              "作業者は運搬前に荷物の重心と固定状況を確認する。"
+            ]
+          },
+          {
+            "risk": "フォークリフト運搬時、材料運搬車と激突",
+            "accType": "③激突",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "発進前に周囲の目視確認を実施",
+              "作業責任者は運搬計画を作成し誘導者を配置する。",
+              "作業者は誘導者の指示に従い運搬する。",
+              "誘導者はフォークリフト運搬時の進路を確保し第三者を排除する。",
+              "作業責任者は作業区画を明確にし立入禁止措置を講じる。",
+              "作業者は交差点や出入口で一時停止し安全確認する。"
+            ]
+          },
+          {
+            "risk": "フォークリフト運搬時、第三者と激突",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "周囲の目視確認、交差点での指差呼称の徹底",
+              "作業責任者は作業区画を明確にし立入禁止措置を講じる。",
+              "作業者は一時停止し左右安全確認して運搬する。",
+              "監視人は第三者の侵入を監視し即時注意喚起する。",
+              "誘導者は進路の安全を確保する。",
+              "作業責任者は運搬前に周囲の安全確認を徹底する。"
+            ]
+          },
+          {
+            "risk": "フォークリフト走行時、発進時に人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "進行方向に人がいないことを目視確認後に走行",
+              "作業責任者は発進前に周囲の安全確認を徹底する。",
+              "作業者は発進時に警告音を鳴らし合図する。",
+              "誘導者は発進時に周囲の作業者へ注意喚起し誘導する。",
+              "作業者は発進時は死角を確認し合図者と連携する。",
+              "作業者は見通しの悪い場所で徐行する。"
+            ]
+          },
+          {
+            "risk": "フォークリフト爪操作時、手足を挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "動作範囲に人がいないか確認、人払いを実施",
+              "作業責任者は作業手順を明確にし作業者へ周知する。",
+              "作業者は爪操作時に手足を爪の進行方向に置かない。",
+              "監視人は操作時の手足位置を確認し危険行動を注意する。",
+              "作業者は危険箇所を指差呼称で確認する。",
+              "作業者は作業中に周囲へ注意喚起し危険行動を防止する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "天井クレーン",
+        "items": [
+          {
+            "risk": "天井クレーン上作業時、クラブトロリーが動き挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "可動範囲に入る前に動力源遮断確認を行う",
+              "作業責任者はクレーン動力源遮断とLOTOを徹底する。",
+              "作業者はトロリー稼働範囲に立ち入らず作業する。",
+              "監視人はクレーン操作の有無を監視し危険時は即時注意する。",
+              "作業責任者は作業前に合図応答と立会基準を明確にする。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "天井クレーン上作業時、工具等落下し下の人に当たる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "エリア区画を行い、人払いを実施する",
+              "作業責任者は落下防止措置と立入禁止措置を徹底する。",
+              "作業者は工具等を落下防止用具で管理する。",
+              "監視人は下部の立入禁止措置を徹底する。",
+              "作業者は落下防止用袋等を使用し管理する。",
+              "作業責任者は作業前に落下リスク箇所を点検する。"
+            ]
+          },
+          {
+            "risk": "天井クレーン上作業時、動いた反動でバランス崩し落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "動力源遮断確認、操作部に作業札を取り付ける",
+              "作業責任者は作業前にクレーン動作停止を確認する。",
+              "作業者は墜落制止用器具を正しく使用し作業する。",
+              "監視人は作業中の動作範囲を監視し注意喚起する。",
+              "作業責任者は作業前に作業手順と安全対策を周知する。",
+              "作業者は移動時に三点支持で慎重に移動する。"
+            ]
+          },
+          {
+            "risk": "天井クレーン上歩行時、開口部で足を踏み外し落下",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "開口部付近では2丁掛け墜落静止用器具を使用する",
+              "作業責任者は開口部の囲い・手摺・覆い設置を徹底する。",
+              "作業者は開口部付近では墜落制止用器具を使用する。",
+              "監視人は作業中の開口部周囲を監視し立入禁止措置を講じる。",
+              "作業責任者は作業前に開口部の点検と危険箇所の周知を行う。",
+              "作業者は暗い場合は適切な照明を設置して作業する。"
+            ]
+          },
+          {
+            "risk": "天井クレーン操作時、フックがM/Cや人と接触",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "フックの位置を目視確認して動作させる",
+              "作業責任者は作業前に合図者と指揮者を明確にする。",
+              "作業者はフック操作時に進行方向に人がいないことを確認する。",
+              "監視人はクレーン操作範囲内の第三者立入禁止措置を実施する。",
+              "作業責任者は作業開始前に作業手順と合図方法を周知する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "点検",
+        "items": [
+          {
+            "risk": "クレーン干渉領域高所作業時、クレーンが動き激突",
+            "accType": "⑤崩壊・倒壊",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "クレーンの動力源遮断確認、作業前に担当者へ連絡",
+              "作業責任者はクレーン作業と高所作業の同時実施を禁止する。",
+              "作業指揮者は合図応答を徹底し指示に従い作業する。",
+              "監視人は高所作業中はクレーン操作を禁止する。",
+              "作業責任者は作業前に作業範囲の調整を行う。",
+              "作業者はクレーン稼働範囲に立ち入らない。"
+            ]
+          },
+          {
+            "risk": "クレーン上試運転時、走行横行時に挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "合図応答確認で周囲の目視確認を行い、動作させる",
+              "作業責任者は合図応答を徹底し指揮者の指示に従わせる。",
+              "作業者は走行範囲内に立ち入らず作業する。",
+              "監視人は走行範囲を監視し第三者の立入を防止する。",
+              "作業責任者は立会基準を明確にし現場で打ち合わせを行う。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "クレーン上試運転時、動かし反動で転落",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "上部作業車から合図があるまで、操作電源を切る",
+              "作業責任者は試運転前に現場で作業手順と合図応答を周知する。",
+              "作業者はヘルメット・墜落制止用器具を着用し作業する。",
+              "監視人は作業中の作業者の位置を監視し危険時は即時注意する。",
+              "作業責任者は作業前にM/C内の人・物を確認する。",
+              "作業者は作業範囲から1m以上離れて操作する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "重量物",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "荷のバランス不良や宙吊り放置で荷崩れ・転倒事故が発生する。",
+            "accType": "⑤崩壊・倒壊",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は吊り上げ前に地切りで荷のバランス・荷姿を確認する。",
+              "作業指揮者はバランス不良時は作業を中断し再調整する。",
+              "監視人は吊り上げ時の荷の安定性を監視し異常時は即時注意する。",
+              "作業責任者は重量物の宙吊り放置を禁止し周知する。",
+              "作業者は荷を吊ったまま現場を離れない。"
+            ]
+          },
+          {
+            "risk": "合図・応答・安全確認不足や作業指揮者不在で作業ミス・災害となる。",
+            "accType": "④飛来・落下",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は必ず作業指揮者を選任し明確にする。",
+              "作業指揮者は合図・応答・安全確認を徹底し指揮する。",
+              "作業者は指揮者の指示・合図に従い作業する。",
+              "監視人は作業指揮者の不在や不備を監督し是正する。",
+              "作業責任者は作業開始前に人員配置と役割分担を確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "トロリ",
+        "items": [
+          {
+            "risk": "トロリ移動時、ピン破損し落下する",
+            "accType": "④飛来・落下",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "トロリは横荷重に弱い為、極力垂直に吊り作業を行う",
+              "作業責任者はトロリのピンの点検・交換基準を周知徹底する。",
+              "作業者は作業前にピンの損傷・摩耗を確認する。",
+              "監視人は移動時に異常音やガタつきがないか監視する。",
+              "作業者は異常発見時に作業を中止し上司へ報告する。"
+            ]
+          },
+          {
+            "risk": "トロリ移動時、人や設備に激突させる",
+            "accType": "③激突",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "移動時はゆっくり操作し進行方向の人払いを行う",
+              "作業責任者はトロリ移動ルートの安全を事前に確認する。",
+              "誘導者は移動時に進路上の第三者を排除する。",
+              "作業者は低速で移動し周囲の安全を確認する。",
+              "監視人は作業時に第三者の接近を監視し注意喚起する。"
+            ]
+          },
+          {
+            "risk": "トロリ取付取外時、落下させ身体にあたる",
+            "accType": "④飛来・落下",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "1人で作業せず2人で取付/取外を行う",
+              "作業責任者はトロリ取付取外し手順を作業者へ周知する。",
+              "作業者は落下防止策を実施し慎重に作業する。",
+              "監視人は取付取外し時の作業者位置を監視し注意喚起する。",
+              "作業者は作業前に危険箇所を指差呼称で確認する。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "玉掛け",
+        "items": [
+          {
+            "risk": "スリング玉掛け時、手を内側に入れ挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 2,
+            "prb": "D",
+            "measures": [
+              "スリングの内側に手を入れない、合図応答確認実施",
+              "作業責任者はスリング玉掛け手順を作業者へ周知する。",
+              "作業者は手を内側に入れず玉掛け作業を行う。",
+              "監視人は作業時に手の位置を監視し危険時は即時注意する。",
+              "作業者は指差呼称で危険箇所を確認する。"
+            ]
+          },
+          {
+            "risk": "玉掛け作業時、ワイヤー素線で手を切る",
+            "accType": "⑨切れこすれ",
+            "inj": 1,
+            "prb": "D",
+            "measures": [
+              "保護手袋着用で作業を実施",
+              "作業責任者は作業前に保護手袋着用を指示する。",
+              "作業者は耐切創手袋を着用し玉掛け作業を行う。",
+              "監視人は作業時に手袋着用状況を確認し注意喚起する。",
+              "作業者はワイヤーの損傷や素線切れを事前に点検する。"
+            ]
+          },
+          {
+            "risk": "玉掛け作業時、ワイヤー張りで手を挟まれる",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "ワイヤーの内側に手を入れない、合図応答確認実施",
+              "作業責任者は作業手順を明確にし作業者へ周知する。",
+              "作業者はワイヤー張り時に手を挟まない位置で作業する。",
+              "監視人は作業時に手の位置を監視し危険時は即時注意する。",
+              "作業者は指差呼称で危険箇所を確認する。"
+            ]
+          },
+          {
+            "risk": "玉掛けや吊具取付・取外し時、手指の挟まれ・切創事故が発生する。",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業指揮者を決め合図応答を徹底する。",
+              "作業指揮者は作業手順・合図方法を周知し指揮する。",
+              "作業者は手指を挟まない位置で作業し耐切創手袋を着用する。",
+              "監視人は作業中の手指の位置を監督し危険時は即時注意する。",
+              "作業責任者は異常時は作業を中断し再確認を指示する。"
+            ]
+          },
+          {
+            "risk": "荷の吊り上げ・運搬時、ワイヤーやスリング破断で落下災害が発生する。",
+            "accType": "④飛来・落下",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は十分な安全荷重のワイヤー・スリングを選定し使用する。",
+              "作業者は作業前にワイヤー・スリングの損傷や異常を点検する。",
+              "監視人は吊り荷運搬前にワイヤー・スリングの状態を再確認する。",
+              "作業責任者はリース品は耐荷重テスト済品を使用する。",
+              "作業者は定格荷重を超えて荷を吊らない。"
+            ]
+          },
+          {
+            "risk": "荷振れや斜め吊り・横引き時、作業者が荷に激突・接触する。",
+            "accType": "③激突",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は吊り作業は必ず垂直吊りとし斜め吊りは禁止する。",
+              "作業指揮者は吊り角度と荷姿を確認し指示する。",
+              "作業者は荷振れ時は3m以上離れ介錯ロープで制御する。",
+              "監視人は吊り荷の周囲の第三者立入を監視し排除する。",
+              "作業指揮者は合図応答を徹底し作業ミスを防止する。"
+            ]
+          },
+          {
+            "risk": "吊り荷の下に作業者や第三者が入り、落下時に重篤災害となる。",
+            "accType": "④飛来・落下",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は吊り荷下の立入禁止措置を徹底する。",
+              "作業指揮者は作業開始前に人払いを実施し確認する。",
+              "監視人は吊り荷下や進行方向に人がいないか常時監視する。",
+              "作業者は絶対に吊り荷の下に立ち入らない。",
+              "作業責任者は立入禁止表示やバリケードで第三者の侵入を防止する。"
+            ]
+          },
+          {
+            "risk": "吊り角度不良や玉掛け用具の外れ・破断で荷落下災害が発生する。",
+            "accType": "④飛来・落下",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は吊り角度が60度以内になるよう指示する。",
+              "作業者は吊り角度を確認し適切な玉掛け方法で作業する。",
+              "監視人は吊り角度や玉掛け用具の状態を監視し注意喚起する。",
+              "作業指揮者は玉掛け用具の外れ・破断リスクを都度確認する。",
+              "作業者は異常時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "吊具取外し時、高所で足を滑らせて作業者が転落する。",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は高所作業時に必ず墜落制止用器具の使用を徹底する。",
+              "作業者はフルハーネス型墜落制止用器具を正しく着用する。",
+              "監視人は墜落制止用器具未使用者がいないか監視する。",
+              "作業責任者は作業前に器具の点検と特別教育受講を確認する。",
+              "作業者は昇降設備や親綱を使用し安全作業を行う。"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "重量物運搬",
+        "items": [
+          {
+            "risk": "重量物運搬時、台車から崩れ落ち足を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業指揮者を決め、合図応答を確認しながら作業を進める。",
+              "作業責任者は運搬通路、荷の形状・手順・足場等を事前に確認する。",
+              "作業者は荷を台車の中央に乗せ、偏荷重にならないように運搬する。",
+              "監視人兼誘導者は運搬時に荷の動きと作業者の足元を監視し注意喚起する。",
+              "作業者は荷崩れ防止のため荷をしっかり固定し、運搬時は低速で押す。"
+            ]
+          },
+          {
+            "risk": "重量物運搬時、荷振れや荷崩れにより指や手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業指揮者を決め合図応答を徹底する。",
+              "作業指揮者は作業手順・合図方法を周知し指揮する。",
+              "作業者は荷のバランス確認と荷振れ防止策を徹底する。",
+              "監視人兼誘導者は荷の動きと作業者の位置を監視し注意喚起する。",
+              "作業者は荷の進行方向に手を出さず3m以上離れて作業する。"
+            ]
+          },
+          {
+            "risk": "重量物を台車で運搬時、重心が偏り転倒・荷物落下し指や手を挟む",
+            "accType": "⑦挟まれ",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は運搬通路・荷の形状・手順・足場等を事前に確認する。",
+              "作業者は荷を台車の中央に乗せ偏荷重にならないよう運搬する。",
+              "監視人兼誘導者は運搬時に荷の動きと作業者の足元を監視し注意喚起する。",
+              "作業者は荷をしっかり固定し運搬時は低速で押す。",
+              "作業責任者は段差や凹凸には養生を施し安全を確保する。"
+            ]
+          },
+          {
+            "risk": "台車運搬時、段差や凹凸の養生不足で台車が転倒",
+            "accType": "⑤崩壊・倒壊",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は運搬通路や段差・凹凸箇所を事前に確認し養生する。",
+              "作業者は台車運搬時に段差や凹凸を避けて慎重に通過する。",
+              "監視人兼誘導者は運搬時に台車と作業者の足元を監視し注意喚起する。",
+              "作業責任者は必要に応じて補助者を配置し安全を確保する。",
+              "作業者は荷をしっかり固定し低速で運搬する。"
+            ]
+          },
+          {
+            "risk": "荷の固縛不良で運搬中に荷崩れし、転倒や怪我につながる。",
+            "accType": "⑦挟まれ",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は荷の固縛方法を明確にし周知する。",
+              "作業者は運搬前に荷をしっかり固縛し固定を確認する。",
+              "監視人は運搬中に荷の固定状況を監視し異常時は即時注意する。",
+              "作業責任者は必要に応じて補助具や台車を使用させる。",
+              "作業者は運搬中荷崩れを感じたら直ちに作業を中断する。"
+            ]
+          },
+          {
+            "risk": "重量物運搬時、無理な姿勢で持ち上げ腰痛や転倒災害。",
+            "accType": "⑱その他（）",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は無理な姿勢が発生しない作業手順を検討する。",
+              "作業者は腰を曲げず膝を使って持ち上げる。",
+              "監視人は不適切な姿勢を見つけた場合は即時注意する。",
+              "作業者は腰痛予防ベルト等の保護具を着用する。",
+              "作業責任者は必要に応じて補助具や機器の使用を指示する。"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "電気工事",
+    "subs": [
+      {
+        "name": "",
+        "items": [
+          {
+            "risk": "電源遮断作業時、LOTO未実施になり感電する。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者は作業前に主電源を切りLOTOを必ず実施する。",
+              "作業指揮者はLOTOの実施状況を現場で確認する。",
+              "作業者はLOTOタグを自分で掛け、鍵を携帯する。",
+              "監視人はLOTO未実施者がいないか巡回し確認する。",
+              "作業責任者はLOTO解除時も必ず指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "配線接続作業時、端子締付不良になりショートや火災になる。",
+            "accType": "⑮爆発・火災",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業前に端子台・工具の点検を行う。",
+              "作業者は規定トルクで端子を締付ける。",
+              "監視人は接続後の端子緩みや異常発熱を確認する。",
+              "作業責任者は作業後に端子部の再点検を実施する。",
+              "作業者は異常時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "制御盤作業時、認定者以外が扉を開け感電する。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者は認定者以外の制御盤扉開放を禁止し周知する。",
+              "作業者は認定証を携帯し作業前に確認する。",
+              "監視人は作業エリアへの立入者を監視し注意喚起する。",
+              "作業責任者は作業前に認定者リストを掲示し管理する。",
+              "作業者は扉開放時は必ず指差呼称で確認する。"
+            ]
+          },
+          {
+            "risk": "活線作業時、絶縁用具未使用になり感電する。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は絶縁用具（ゴム手袋・絶縁靴等）の使用を徹底する。",
+              "作業者は絶縁用具の外観・耐用年数を点検し正しく着用する。",
+              "監視人は絶縁用具未使用者がいないか現場で監視する。",
+              "作業責任者は作業前に絶縁用具の点検記録を確認する。",
+              "作業者は絶縁用具に異常があれば使用せず上司に報告する。"
+            ]
+          },
+          {
+            "risk": "高所配線作業時、墜落制止用器具未使用により墜落する。",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者は2m以上の高所作業で墜落制止用器具使用を徹底する。",
+              "作業者はフルハーネス型墜落制止用器具を正しく着用する。",
+              "監視人は墜落制止用器具未使用者がいないか監視する。",
+              "作業責任者は作業前に器具の点検と特別教育受講を確認する。",
+              "作業者は親綱や手摺の設置状況を確認し安全作業を行う。"
+            ]
+          },
+          {
+            "risk": "ジョイント部作業時、テーピング不良になり芯線露出で短絡する。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者はジョイント部のテーピング手順を作業者へ周知する。",
+              "作業者は芯線露出がないよう確実にテーピングを行う。",
+              "監視人は作業後にジョイント部の状態を確認し不良時は是正する。",
+              "作業責任者はエフコテープ等の併用を指示する。",
+              "作業者は異常時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "高圧近接作業時、アース未実施になり感電・重篤災害になる。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者は作業前にアースの実施を指示し確認する。",
+              "作業指揮者は作業分担と指示命令系統を明確にする。",
+              "監視人は主電源スイッチに配置し作業状況を監視する。",
+              "作業者は必ずアースを取り付けてから作業を開始する。",
+              "作業責任者は無電圧確認とアース取付をダブルチェックする。"
+            ]
+          },
+          {
+            "risk": "材料や工具の養生不足により、落下し第三者に被災させる。",
+            "accType": "①墜落・転落",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は養生シートや落下防止措置を徹底する。",
+              "作業責任者は工具・材料をロープ等で固定するように指示する。",
+              "監視人は作業エリア下部の立入禁止措置を徹底する。",
+              "作業責任者は作業前後に不要物・不要工具の回収を指示する。",
+              "作業者は工具・材料をロープ等で確実に固定する。"
+            ]
+          },
+          {
+            "risk": "屋内仮配線作業時、誤配線になり誤作動・火災になる。",
+            "accType": "⑮爆発・火災",
+            "inj": 3,
+            "prb": "D",
+            "measures": [
+              "作業責任者は仮配線作業の手順と回路図を作業者へ周知する。",
+              "作業者は配線・接続前に回路図と現物を照合する。",
+              "監視人は作業後に誤配線がないかダブルチェックする。",
+              "作業責任者は仮配線は原則禁止としやむを得ず行う場合は管理する。",
+              "作業者は異常時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "ラック・パイプ上を伝い歩きになり墜落する。",
+            "accType": "①墜落・転落",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者はラック・パイプ上の伝い歩きを原則禁止し周知する。",
+              "作業者は作業床や昇降設備を使用し安全に作業する。",
+              "監視人は不安全行動を監督し即時是正する。",
+              "作業責任者は高所作業時に監視人を配置する。",
+              "作業者はやむを得ず高所作業時は墜落制止用器具を着用する。"
+            ]
+          },
+          {
+            "risk": "配線撤去作業時、電源遮断・LOTO未実施で感電事故になる。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "C",
+            "measures": [
+              "作業責任者は撤去作業前に主電源遮断とLOTOを必ず実施する。",
+              "作業者はLOTOタグを自分で掛け、鍵を携帯する。",
+              "監視人はLOTO未実施者がいないか現場で確認する。",
+              "作業責任者は作業開始前に無電圧確認を指差呼称で行う。",
+              "作業者は異常時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "配線撤去作業時、間違えて活線を切断しショート・感電する",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業前に活線・死線の識別を徹底する。",
+              "作業者は活線・死線を検電器で確認し作業する。",
+              "監視人は切断前に回路の確認・指差呼称を徹底する。",
+              "作業責任者は撤去範囲・活線範囲を現場で周知する。",
+              "作業者は不明時は作業を中断し上司に報告する。"
+            ]
+          },
+          {
+            "risk": "他社がまだ作業中にもかかわらず電源を投入し、感電させる。",
+            "accType": "⑭感電",
+            "inj": 4,
+            "prb": "D",
+            "measures": [
+              "作業責任者は作業範囲・電源投入管理を徹底し掲示する。",
+              "作業指揮者は作業終了・退避を確認し電源投入する。",
+              "監視人は他社作業中の表示と電源投入禁止表示を徹底する。",
+              "作業責任者は作業前に他社との作業調整会議を実施する。",
+              "作業者は作業終了報告と電源投入前の最終確認を行う。"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+];
+// ★ DB ここまで ★
+
+
+// ================================================================
+
+var AT=['①墜落・転落','②転倒','③激突','④飛来・落下','⑤破壊・転倒','⑥激突され','⑦挟まれ','⑧巻き込まれ','⑨切れこすれ','⑩踏み抜き','⑪溺れ','⑫高温・低温物との接触','⑬有害物等への接触','⑭感電','⑮火災・爆発','⑯破裂','⑰交通事故','⑱その他'];
+var INJ=[{v:1,l:'①赤チン災害'},{v:2,l:'②軽度災害'},{v:3,l:'③重大災害'},{v:4,l:'④重篤・後遺症'}];
+var PRB=[{v:'A',l:'A：ほとんどない'},{v:'B',l:'B：可能性がある'},{v:'C',l:'C：可能性が高い'},{v:'D',l:'D：確実に起きる'}];
+var WTYPE=['準備作業','重量物','高所作業','火気作業','重機・クレーン','感電','化学物質','高重心物'];
+var WCLS=['s0','s2','s1','s3','s2','s2','s2','s2'];
+var SPECIAL=['重量物','高所作業','火気作業','重機・クレーン','感電','化学物質','高重心物'];
+// DBカテゴリと作業種別の対応マップ（作業種別名 → DBカテゴリ名）
+var WTYPE_DB_MAP={
+  '準備作業':      '準備作業',
+  '重量物':        '重量物',
+  '高所作業':      '高所作業',
+  '火気作業':      '火気作業',
+  '重機・クレーン':'重機・クレーン',
+  '感電':          '一般',
+  '化学物質':      '化学物質',
+  '高重心物':      '高重心物'
+};
+var LS_STEP='sak_sh', LS_CONT='sak_ch', LS_MGR='sak_mh', LS_SITE='sak_sih', LS_COMP='sak_coh', LS_DATA='sak_data';
+
+var steps=[];
+var _dbCid=null, _dbRi=0, _dbMi=[], _dbCurrentAccType='', _dbItems=[];
+var _copyCid=null;
+var _dirty=false;
+
+function uid(){return '_'+Math.random().toString(36).slice(2,10);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function newC(){return {id:uid(),name:'',risks:[newR()]};}
+function newR(){return {id:uid(),risk:'',accType:'',inj:'',prb:'',measure:''};}
+function renum(){steps.forEach(function(s,i){s._no=i+1;});}
+// RA評価：Excelの式と同じ対応表で計算
+// 確率: A=ない(低)→D=確実(高)、ケガ: ①低→④高
+var RA_TABLE={
+  '①A':1,'①B':2,'②A':3,'①C':4,'③A':5,
+  '②B':6,'①D':7,'④A':8,'②C':9,
+  '③B':10,'②D':11,'④B':12,'③C':13,
+  '③D':14,'④C':15,'④D':16
+};
+function calcRA(inj,prb){
+  if(!inj||!prb)return{sc:'-',lv:'-',cls:''};
+  var injChar='①②③④'.charAt(Number(inj)-1);
+  var key=injChar+String(prb);
+  var sc=RA_TABLE[key];
+  if(!sc)return{sc:'-',lv:'-',cls:''};
+  var lv,cls;
+  if(sc<=5){lv='Ⅰ';cls='lv1';}
+  else if(sc<=9){lv='Ⅱ';cls='lv2';}
+  else if(sc<=13){lv='Ⅲ';cls='lv3';}
+  else{lv='Ⅳ';cls='lv4';}
+  return{sc:sc,lv:lv,cls:cls};
+}
+function mk(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;return e;}
+function mkbtn(lbl,cls,fn){var b=mk('button','btn '+cls,lbl);b.addEventListener('click',fn);return b;}
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return[];}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsStr(k,d){try{return localStorage.getItem(k)||d||'';}catch(e){return d||'';}}
+function lsStrSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function histAdd(key,val){val=val.trim();if(!val)return;var h=lsGet(key);if(h.indexOf(val)>=0)return;h.unshift(val);if(h.length>60)h=h.slice(0,60);lsSet(key,h);}
+function histDel(key,val){lsSet(key,lsGet(key).filter(function(x){return x!==val;}));}
+function markDirty(){_dirty=true;document.getElementById('save-status').textContent='● 未保存';}
+function markSaved(){_dirty=false;document.getElementById('save-status').textContent='✓ 保存済み';}
+
+// ---------- autocomplete ----------
+function makeAC(placeholder,histKey,initVal,onChange){
+  var wrap=mk('div','acw');
+  var inp=mk('input');inp.type='text';inp.className='aci';inp.placeholder=placeholder;inp.value=initVal||'';
+  var drop=mk('div','acd');drop.style.display='none';
+  var fi=-1;
+  function items(f){var h=lsGet(histKey);return f?h.filter(function(x){return x.toLowerCase().indexOf(f.toLowerCase())>=0;}):h;}
+  function show(f){
+    var s=items(f).slice(0,15);if(!s.length){drop.style.display='none';fi=-1;return;}
+    drop.innerHTML='';fi=-1;
+    s.forEach(function(v){
+      var item=mk('div','aci-item');
+      var sp=mk('span',null,v);
+      var del=mk('span','aci-del','✕');del.title='削除';
+      del.addEventListener('mousedown',function(e){e.preventDefault();e.stopPropagation();histDel(histKey,v);show(inp.value);});
+      item.appendChild(sp);item.appendChild(del);
+      item.addEventListener('mousedown',function(e){e.preventDefault();inp.value=v;onChange(v);histAdd(histKey,v);drop.style.display='none';markDirty();});
+      drop.appendChild(item);
+    });
+    drop.style.display='block';
+  }
+  function moveFi(d){var its=drop.querySelectorAll('.aci-item');if(!its.length)return;its[fi]&&its[fi].classList.remove('focused');fi=Math.max(0,Math.min(its.length-1,fi+d));its[fi].classList.add('focused');its[fi].scrollIntoView({block:'nearest'});}
+  inp.addEventListener('focus',function(){show(inp.value);});
+  inp.addEventListener('input',function(){onChange(inp.value);show(inp.value);markDirty();});
+  inp.addEventListener('blur',function(){setTimeout(function(){drop.style.display='none';},160);});
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'){e.preventDefault();moveFi(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();moveFi(-1);}
+    else if(e.key==='Enter'){e.preventDefault();var f=drop.querySelector('.focused');if(f)f.dispatchEvent(new MouseEvent('mousedown'));else{histAdd(histKey,inp.value);drop.style.display='none';}}
+    else if(e.key==='Escape')drop.style.display='none';
+  });
+  wrap.appendChild(inp);wrap.appendChild(drop);
+  wrap._inp=inp;
+  return wrap;
+}
+
+// ---------- 保存ファイル名生成 ----------
+function makeSaveFileName(){
+  var date=document.getElementById('f-date').value;
+  var title=document.getElementById('f-title').value.trim()||'無題';
+  var datePart='';
+  if(date){
+    var d=new Date(date);
+    if(!isNaN(d)){
+      datePart=(d.getMonth()+1)+'月'+d.getDate()+'日_';
+    }
+  }
+  return datePart+title;
+}
+
+// ---------- 自動保存 ----------
+function autoSave(){
+  var data={
+    date:document.getElementById('f-date').value,
+    title:document.getElementById('f-title').value,
+    site: document.getElementById('ac-site-wrap')._inp ? document.getElementById('ac-site-wrap')._inp.value : '',
+    mgr:  document.getElementById('ac-mgr-wrap')._inp  ? document.getElementById('ac-mgr-wrap')._inp.value  : '',
+    company: document.getElementById('ac-comp-wrap')._inp ? document.getElementById('ac-comp-wrap')._inp.value : '',
+    steps:steps
+  };
+  lsStrSet(LS_DATA, JSON.stringify(data));
+  markSaved();
+}
+
+// ---------- クリア処理 ----------
+function clearData(){
+  if(!confirm('入力内容をすべてクリアします。よろしいですか？\n（クリア前に保存することをお勧めします）')){return;}
+  // クリア前に保存促進ダイアログ
+  showClearSavePrompt();
+}
+function showClearSavePrompt(){
+  var ov=document.getElementById('clear-save-overlay');
+  if(ov){ov.classList.add('open');return;}
+  // 動的生成
+  var o=mk('div','ov');o.id='clear-save-overlay';
+  var m=mk('div','modal');
+  m.style.maxWidth='380px';
+  var ttl=mk('div','mttl','🗑️ クリアの確認');
+  var msg=mk('div','al alw');msg.style.marginBottom='14px';
+  msg.textContent='クリアする前にデータを保存しますか？';
+  var ft=mk('div','mft');
+  var btnSaveAndClear=mkbtn('💾 保存してクリア','bn',function(){
+    autoSave();
+    execClear();
+    o.classList.remove('open');
+  });
+  var btnClearOnly=mkbtn('保存せずクリア','br',function(){
+    execClear();
+    o.classList.remove('open');
+  });
+  var btnCancel=mkbtn('キャンセル','bg',function(){o.classList.remove('open');});
+  ft.appendChild(btnCancel);ft.appendChild(btnClearOnly);ft.appendChild(btnSaveAndClear);
+  m.appendChild(ttl);m.appendChild(msg);m.appendChild(ft);
+  o.appendChild(m);document.body.appendChild(o);
+  o.classList.add('open');
+  o.addEventListener('click',function(e){if(e.target===o)o.classList.remove('open');});
+}
+function execClear(){
+  document.getElementById('f-date').value='';
+  document.getElementById('f-title').value='';
+  if(document.getElementById('ac-comp-wrap')._inp)document.getElementById('ac-comp-wrap')._inp.value='';
+  if(document.getElementById('ac-site-wrap')._inp)document.getElementById('ac-site-wrap')._inp.value='';
+  if(document.getElementById('ac-mgr-wrap')._inp)document.getElementById('ac-mgr-wrap')._inp.value='';
+  steps=[];addStep();render();renderRisk&&renderRisk();
+  lsStrSet(LS_DATA,'');markSaved();
+  alert('クリアしました。');
+}
+
+function loadSaved(){
+  var raw=lsStr(LS_DATA,'');
+  if(!raw) return false;
+  try{
+    var data=JSON.parse(raw);
+    document.getElementById('f-date').value=data.date||'';
+    document.getElementById('f-title').value=data.title||'';
+    if(data.company) lsStrSet('_tmpcomp',data.company||'');
+    // ACフィールドは後でinitAC後に設定
+    if(data.site) lsStrSet('_tmpsite',data.site);
+    if(data.mgr)  lsStrSet('_tmpmgr', data.mgr);
+    if(data.steps&&data.steps.length){
+      steps=data.steps;
+      renum();
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ---------- 初期化 ----------
+document.addEventListener('DOMContentLoaded',function(){
+  var hasSaved=loadSaved();
+  if(!hasSaved){addStep();}
+
+  // AC for 作業場所・工事現場責任者・会社名
+  var siteWrap=document.getElementById('ac-site-wrap');
+  var mgrWrap=document.getElementById('ac-mgr-wrap');
+  var compWrap=document.getElementById('ac-comp-wrap');
+  var tmpSite=lsStr('_tmpsite',''), tmpMgr=lsStr('_tmpmgr',''), tmpComp=lsStr('_tmpcomp','');
+  var acSite=makeAC('例：○○工場 第1棟 3F',LS_SITE,tmpSite,function(v){markDirty();});
+  var acMgr=makeAC('例：山田 太郎',LS_MGR,tmpMgr,function(v){markDirty();});
+  var acComp=makeAC('例：○○建設株式会社',LS_COMP,tmpComp,function(v){markDirty();});
+  siteWrap.appendChild(acSite.querySelector('.aci'));
+  siteWrap.appendChild(acSite.querySelector('.acd'));
+  siteWrap._inp=acSite._inp||acSite.querySelector('.aci');
+  mgrWrap.appendChild(acMgr.querySelector('.aci'));
+  mgrWrap.appendChild(acMgr.querySelector('.acd'));
+  mgrWrap._inp=acMgr._inp||acMgr.querySelector('.aci');
+  compWrap.appendChild(acComp.querySelector('.aci'));
+  compWrap.appendChild(acComp.querySelector('.acd'));
+  compWrap._inp=acComp._inp||acComp.querySelector('.aci');
+
+  render();bindGlobal();initDbModal();initDbStatus();
+
+  // 自動保存タイマー
+  setInterval(function(){if(_dirty)autoSave();},5000);
+
+  // ブラウザを閉じる前の確認
+  window.addEventListener('beforeunload',function(e){
+    if(_dirty){e.preventDefault();e.returnValue='入力中の内容が保存されていません。このまま閉じますか？';}
+  });
+  markSaved();
+});
+
+function bindGlobal(){
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var tid=btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+      btn.classList.add('active');document.getElementById(tid).classList.add('active');
+      if(tid==='tr')renderRisk();
+      if(tid==='tv')renderPreview();
+      updBadge();
+    });
+  });
+  document.getElementById('btn-add-step').addEventListener('click',function(){addStep();render();markDirty();});
+  document.getElementById('db-cancel').addEventListener('click',closeDb);
+  document.getElementById('db-ok').addEventListener('click',addFromDb);
+  document.getElementById('db-modal').addEventListener('click',function(e){if(e.target===this)closeDb();});
+  document.getElementById('db-cat').addEventListener('change',function(){_dbRi=0;_dbMi=[];renderDbSubs();});
+  document.getElementById('db-sub').addEventListener('change',function(){_dbRi=0;_dbMi=[];renderDbRisks();});
+  document.getElementById('copy-close').addEventListener('click',closeCopy);
+  document.getElementById('copy-modal').addEventListener('click',function(e){if(e.target===this)closeCopy();});
+  document.getElementById('btn-xlsx').addEventListener('click',exportXlsx);
+  document.getElementById('btn-xlsx-pc').addEventListener('click',exportXlsxPc);
+  document.getElementById('btn-save-dl').addEventListener('click',function(){autoSave();alert('保存しました（ブラウザに保存されます）\nファイル名：'+makeSaveFileName());});
+  document.getElementById('btn-clear-data').addEventListener('click',clearData);
+  document.getElementById('btn-load-db').addEventListener('click',function(){document.getElementById('db-file-input').click();});
+  document.getElementById('db-file-input').addEventListener('change',function(e){
+    var f=e.target.files&&e.target.files[0];
+    if(f)loadDbFromFile(f);
+    e.target.value='';
+  });
+  document.getElementById('btn-clear-hist').addEventListener('click',function(){
+    if(confirm('全ての入力履歴を削除しますか？')){
+      [LS_STEP,LS_CONT,LS_MGR,LS_SITE,LS_COMP].forEach(function(k){lsSet(k,[]);});
+      alert('削除しました');
+    }
+  });
+  // 基本情報の変更検知
+  ['f-date','f-title'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',function(){markDirty();});
+  });
+}
+
+// ---------- ステップ・作業内容操作 ----------
+function addStep(after){var s={id:uid(),name:'',workType:[],contents:[newC()]};if(after===undefined){steps.push(s);}else{steps.splice(after+1,0,s);}renum();}
+function delStep(id){if(steps.length<=1){alert('最低1つ必要です');return;}steps=steps.filter(function(s){return s.id!==id;});renum();render();markDirty();}
+function mvStep(id,d){var i=steps.findIndex(function(s){return s.id===id;}),j=i+d;if(j<0||j>=steps.length)return;var t=steps[i];steps[i]=steps[j];steps[j]=t;renum();render();markDirty();}
+function addC(sid,after){var s=steps.find(function(x){return x.id===sid;});if(!s)return;var c=newC();if(after===undefined){s.contents.push(c);}else{s.contents.splice(after+1,0,c);}render();markDirty();}
+function delC(sid,cid){var s=steps.find(function(x){return x.id===sid;});if(!s)return;if(s.contents.length<=1){alert('最低1つ必要です');return;}s.contents=s.contents.filter(function(c){return c.id!==cid;});render();markDirty();}
+function mvC(sid,cid,d){var s=steps.find(function(x){return x.id===sid;});if(!s)return;var i=s.contents.findIndex(function(c){return c.id===cid;}),j=i+d;if(j<0||j>=s.contents.length)return;var t=s.contents[i];s.contents[i]=s.contents[j];s.contents[j]=t;render();markDirty();}
+function addR(cid){var c=findC(cid);if(!c)return;c.risks.push(newR());renderRisk();markDirty();}
+function delR(cid,rid){var c=findC(cid);if(!c)return;if(c.risks.length<=1){alert('最低1件必要です');return;}c.risks=c.risks.filter(function(r){return r.id!==rid;});renderRisk();markDirty();}
+function findC(cid){var found=null;steps.forEach(function(s){s.contents.forEach(function(c){if(c.id===cid)found=c;});});return found;}
+
+// ---------- ① 作業入力タブ描画 ----------
+function render(){
+  var con=document.getElementById('steps-con');con.innerHTML='';
+  steps.forEach(function(s,si){
+    var hasSp=s.workType.some(function(t){return SPECIAL.indexOf(t)>=0;});
+    var blk=mk('div','step-blk'+(hasSp?' sp':''));
+
+    // ステップヘッダー
+    var hdr=mk('div','step-hdr');
+    hdr.appendChild(mk('div','step-no','S'+s._no));
+    var acS=makeAC('作業ステップ名（例：シリンダー整備）',LS_STEP,s.name,function(v){s.name=v;markDirty();});
+    acS.style.flex='1';acS.style.minWidth='0';
+    hdr.appendChild(acS);
+    var sa=mk('div','step-acts');
+    var bu=mkbtn('▲','bg bic',function(){mvStep(s.id,-1);});bu.disabled=si===0;sa.appendChild(bu);
+    var bd=mkbtn('▼','bg bic',function(){mvStep(s.id,1);});bd.disabled=si===steps.length-1;sa.appendChild(bd);
+    sa.appendChild(mkbtn('＋追加','bg bsm',function(){addStep(si);render();markDirty();}));
+    sa.appendChild(mkbtn('✕削除','br bsm',function(){delStep(s.id);}));
+    hdr.appendChild(sa);blk.appendChild(hdr);
+
+    // 作業種別
+    var wr=mk('div','wtype-row');
+    wr.appendChild(mk('div','wtype-lbl','作業種別'));
+    var wbs=mk('div','wtype-btns');
+    WTYPE.forEach(function(type,ti){
+      var sel=s.workType.indexOf(type)>=0;
+      var icons=['📋','⚠️','🪜','🔥','🏗️','⚡','⚗️','⚠️'];
+      var wb=mk('button','wtb '+(sel?WCLS[ti]:''),(icons[ti]||'🔧')+' '+type);
+      wb.addEventListener('click',function(){var i=s.workType.indexOf(type);if(i>=0)s.workType.splice(i,1);else s.workType.push(type);render();updBadge();markDirty();});
+      wbs.appendChild(wb);
+    });
+    wr.appendChild(wbs);blk.appendChild(wr);
+
+    // 作業内容
+    var ca=mk('div','cont-area');
+    ca.appendChild(mk('div','cont-lbl','作業内容（細分された手順）'));
+    s.contents.forEach(function(c,ci){
+      var row=mk('div','cont-row');
+      row.appendChild(mk('div','cont-no',String(ci+1)));
+      var acC=makeAC('作業内容（例：シリンダー取り外し）',LS_CONT,c.name,function(v){c.name=v;markDirty();});
+      acC.style.flex='1';acC.style.minWidth='0';
+      row.appendChild(acC);
+      var ca2=mk('div','cont-acts');
+      ca2.appendChild(mkbtn('📋','bg bic',function(){openCopy(c.id);})).title='転記（名前のみコピー）';
+      var cu=mkbtn('▲','bg bic',function(){mvC(s.id,c.id,-1);});cu.disabled=ci===0;ca2.appendChild(cu);
+      var cd2=mkbtn('▼','bg bic',function(){mvC(s.id,c.id,1);});cd2.disabled=ci===s.contents.length-1;ca2.appendChild(cd2);
+      ca2.appendChild(mkbtn('＋','bg bic',function(){addC(s.id,ci);}));
+      ca2.appendChild(mkbtn('✕','br bic',function(){delC(s.id,c.id);}));
+      row.appendChild(ca2);
+      ca.appendChild(row);
+    });
+    ca.appendChild(mkbtn('＋ 作業内容を追加','bg bsm',function(){addC(s.id);markDirty();}));
+    blk.appendChild(ca);
+    con.appendChild(blk);
+  });
+  updBadge();
+}
+
+// ---------- チェック ----------
+function getSpUsed(){var r=[];steps.forEach(function(s){s.workType.forEach(function(t){if(SPECIAL.indexOf(t)>=0&&r.indexOf(t)<0)r.push(t);});});return r;}
+function getMiss(){
+  var r=[];
+  steps.forEach(function(s){SPECIAL.forEach(function(t){
+    if(s.workType.indexOf(t)>=0){
+      var h=s.contents.some(function(c){return c.risks.some(function(ri){return ri.risk.trim();});});
+      if(!h&&r.indexOf(t)<0)r.push(t);
+    }
+  });});
+  return r;
+}
+function updBadge(){var m=getMiss(),b=document.getElementById('mbadge');b.style.display=m.length>0?'inline':'none';b.textContent=m.length;}
+
+// ---------- ② リスク・対策タブ描画 ----------
+function renderRisk(){
+  var con=document.getElementById('risk-con');con.innerHTML='';
+  var mal=document.getElementById('malert');
+  var miss=getMiss();
+  if(miss.length>0){
+    mal.innerHTML='<div class="al ald">⚠️ <strong>以下の特殊作業のリスクが未入力です：</strong><br>'+miss.map(function(t){return '<span class="badge bred" style="margin:3px 4px 0 0">'+t+'</span>';}).join('')+'</div>';
+  } else if(getSpUsed().length>0){
+    mal.innerHTML='<div class="al als">✅ 全ての特殊作業のリスクが入力されています。</div>';
+  } else { mal.innerHTML=''; }
+
+  if(!steps.length){con.innerHTML='<div class="al ali">① 作業入力タブでステップと作業内容を入力してください。</div>';return;}
+
+  steps.forEach(function(s,si){
+    var isSp=SPECIAL.some(function(t){return s.workType.indexOf(t)>=0;});
+    var wb=s.workType.map(function(t){var bc=t==='高所作業'?'bred':t==='重量物作業'?'borg':t==='火気作業'?'bylw':'bgry';return '<span class="badge '+bc+'" style="font-size:9px;margin-left:3px">'+t+'</span>';}).join('');
+    // ステップごとの背景色
+    var riskBgs=['#f0f7ff','#f5f0ff','#f0fff8','#fff8f0','#f0faff','#fff0f5'];
+    var stepBg=isSp?'#fff3e0':riskBgs[si%riskBgs.length];
+    var blk=mk('div','risk-blk'+(isSp?' sp-blk':''));
+    blk.style.borderColor=isSp?'#fca5a5':'#bfcfe8';
+    var bh=mk('div','risk-hdr');
+    bh.style.background=stepBg;
+    bh.innerHTML='S'+s._no+'　'+esc(s.name||'（ステップ名未入力）')+wb+(isSp?'<span class="sp-tag">★ 特殊作業</span>':'');
+    blk.appendChild(bh);
+
+    s.contents.forEach(function(c,ci){
+      var crow=mk('div','risk-cont-row');
+      var ch=mk('div','risk-cont-hdr');
+      ch.appendChild(mk('div','rcno',String(ci+1)));
+      ch.appendChild(mk('span',null,c.name||'（作業内容未入力）'));
+      crow.appendChild(ch);
+
+      c.risks.forEach(function(r,ri){
+        var ri_el=mk('div','risk-item');
+        var rnum=mk('div','ri-num');
+        rnum.innerHTML='リスク '+(ri+1);
+        if(c.risks.length>1){
+          var rdel=mkbtn('✕削除','br bsm',function(){delR(c.id,r.id);});
+          rdel.style.marginLeft='auto';
+          rnum.appendChild(rdel);
+        }
+        ri_el.appendChild(rnum);
+
+        // リスク内容・対策
+        var rrow=mk('div','ri-row');
+        function mkTA(lbl,val,ph,rows,cb,bgColor){
+          var w=mk('div');w.style.cssText='flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px';
+          var l=mk('label',null,lbl);l.style.cssText='font-size:10px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.05em';
+          var ta=mk('textarea');ta.className='fi';ta.rows=rows;ta.placeholder=ph;ta.value=val;
+          if(bgColor)ta.style.background=bgColor;
+          ta.addEventListener('input',function(){cb(this.value);updBadge();markDirty();});
+          w.appendChild(l);w.appendChild(ta);return w;
+        }
+        rrow.appendChild(mkTA('🔴 リスク内容',r.risk,'どのような危険があるか',2,function(v){r.risk=v;},'#fff5f5'));
+        rrow.appendChild(mkTA('🟢 リスク低減対策',r.measure,'具体的な対策内容',2,function(v){r.measure=v;},'#f0fff4'));
+        ri_el.appendChild(rrow);
+
+        // 事故の型（select選択）
+        var atd=mk('div');atd.style.cssText='margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap';
+        var atlb=mk('div','atlb','事故の型');atlb.style.whiteSpace='nowrap';
+        atd.appendChild(atlb);
+        var atSel=mk('select','rals');atSel.style.flex='1';atSel.style.minWidth='160px';
+        atSel.innerHTML='<option value="">--- 選択してください ---</option>';
+        AT.forEach(function(type){
+          atSel.innerHTML+='<option value="'+esc(type)+'"'+(r.accType===type?' selected':'')+'>'+esc(type)+'</option>';
+        });
+        atSel.addEventListener('change',(function(rref){return function(){rref.accType=this.value;markDirty();};})(r));
+        atd.appendChild(atSel);
+        ri_el.appendChild(atd);
+
+        // RA評価
+        var rar=mk('div','rar');
+        var rarlb=mk('div',null,'RA評価');rarlb.style.cssText='font-size:10px;font-weight:700;color:var(--gray)';rar.appendChild(rarlb);
+        var is=mk('select','rals');is.innerHTML='<option value="">ケガの大きさ</option>';
+        INJ.forEach(function(l){is.innerHTML+='<option value="'+l.v+'"'+(r.inj==l.v?' selected':'')+'>'+l.l+'</option>';});
+        is.addEventListener('change',(function(rref){return function(){rref.inj=this.value;renderRisk();markDirty();};})(r));rar.appendChild(is);
+        var ps=mk('select','rals');ps.innerHTML='<option value="">発生確率</option>';
+        PRB.forEach(function(l){ps.innerHTML+='<option value="'+l.v+'"'+(r.prb===l.v?' selected':'')+'>'+l.l+'</option>';});
+        ps.addEventListener('change',(function(rref){return function(){rref.prb=this.value;renderRisk();markDirty();};})(r));rar.appendChild(ps);
+        var ra=calcRA(r.inj,r.prb);
+        rar.appendChild(mk('div','rasc',ra.sc!=='-'?ra.sc+'点':'-'));
+        rar.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'Lv.'+ra.lv));
+        ri_el.appendChild(rar);
+
+        // DBから選ぶボタン（リスク行ごと・r.accTypeを渡す）
+        var dbRow=mk('div');dbRow.style.cssText='padding:4px 0 2px 0';
+        dbRow.appendChild(mkbtn('📚 DBから選ぶ','bg bsm',(function(rref,cref){return function(){openDb(cref.id,rref);};})(r,c)));
+        ri_el.appendChild(dbRow);
+
+        crow.appendChild(ri_el);
+      });
+
+      // ＋リスク追加行
+      var addRow=mk('div','ri-add-row');
+      addRow.appendChild(mkbtn('＋ リスクを追加','bg bsm',function(){addR(c.id);}));
+      crow.appendChild(addRow);
+      blk.appendChild(crow);
+    });
+    con.appendChild(blk);
+  });
+}
+
+// ---------- 転記 ----------
+function openCopy(cid){
+  _copyCid=cid;
+  var con=document.getElementById('copy-list');con.innerHTML='';
+  var any=false;
+  steps.forEach(function(s){s.contents.forEach(function(c){
+    if(c.id===cid)return;any=true;
+    var div=mk('div','copy-item');
+    div.innerHTML='<strong>'+esc(s.name||'（ステップ未入力）')+'</strong> ▶ '+esc(c.name||'（作業内容未入力）');
+    div.addEventListener('click',(function(src){return function(){
+      var dest=findC(_copyCid);if(dest)dest.name=src.name;
+      closeCopy();render();markDirty();
+    };})(c));
+    con.appendChild(div);
+  });});
+  if(!any)con.innerHTML='<div class="al ali" style="font-size:12px">コピー元になる他の作業内容がありません。</div>';
+  document.getElementById('copy-modal').classList.add('open');
+}
+function closeCopy(){document.getElementById('copy-modal').classList.remove('open');}
+
+// ---------- DBモーダル ----------
+// ---------- DBモーダル（サブカテゴリ対応）----------
+function initDbModal(allowedCats, currentAccType){
+  _dbCurrentAccType = currentAccType || '';
+
+  // カテゴリ選択肢
+  var sel=document.getElementById('db-cat');sel.innerHTML='';
+  RISK_DB.forEach(function(cat){
+    if(allowedCats&&allowedCats.indexOf(cat.name)<0)return;
+    var o=mk('option');o.value=cat.name;o.textContent=cat.name;sel.appendChild(o);
+  });
+  if(!sel.options.length){
+    var o=mk('option');o.value='';o.textContent='（該当するDBカテゴリがありません）';sel.appendChild(o);
+  }
+
+  // 事故の型フィルター表示
+  var infoEl=document.getElementById('db-acctype-info');
+  if(_dbCurrentAccType){
+    infoEl.textContent='🔍 事故の型「'+_dbCurrentAccType+'」で絞り込み中';
+    infoEl.style.display='block';
+  } else {
+    infoEl.style.display='none';
+  }
+
+  renderDbSubs();
+}
+
+function renderDbSubs(){
+  var cn=document.getElementById('db-cat').value;
+  var co=RISK_DB.find(function(c){return c.name===cn;});
+  var subSel=document.getElementById('db-sub');
+  var subWrap=document.getElementById('db-sub-wrap');
+  subSel.innerHTML='';
+
+  if(!co){renderDbRisks();return;}
+
+  // サブカテゴリ一覧（''以外）
+  var subNames=co.subs.filter(function(s){return s.name!=='';}).map(function(s){return s.name;});
+
+  if(!subNames.length){
+    // サブカテゴリなし → wrap非表示
+    subWrap.style.display='none';
+  } else {
+    subWrap.style.display='block';
+    // 「すべて」オプション
+    var allOpt=mk('option');allOpt.value='__all__';allOpt.textContent='すべて（サブカテゴリなし含む）';subSel.appendChild(allOpt);
+    subNames.forEach(function(sn){
+      var o=mk('option');o.value=sn;o.textContent=sn;subSel.appendChild(o);
+    });
+  }
+
+  _dbRi=0;_dbMi=[];
+  renderDbRisks();
+}
+
+function getDbItems(){
+  // 現在のカテゴリ・サブカテゴリ・事故の型フィルターを考慮してitemsを返す
+  var cn=document.getElementById('db-cat').value;
+  var co=RISK_DB.find(function(c){return c.name===cn;});
+  if(!co)return[];
+
+  var subSel=document.getElementById('db-sub');
+  var subVal=subSel.value;
+  var subWrap=document.getElementById('db-sub-wrap');
+  var hasSubCats=subWrap.style.display!=='none';
+
+  var items=[];
+  if(!hasSubCats||subVal==='__all__'){
+    // サブカテゴリなし全部 + サブカテゴリあり全部
+    co.subs.forEach(function(s){items=items.concat(s.items);});
+  } else {
+    // 選択中のサブカテゴリ ＋ サブなし（''）を常に含む
+    co.subs.forEach(function(s){
+      if(s.name===subVal||s.name===''){items=items.concat(s.items);}
+    });
+  }
+
+  // 事故の型フィルター
+  if(_dbCurrentAccType){
+    items=items.filter(function(item){return item.accType===_dbCurrentAccType;});
+  }
+  return items;
+}
+
+function renderDbRisks(){
+  _dbItems=getDbItems();
+  var con=document.getElementById('db-risks');con.innerHTML='';
+  _dbRi=0;_dbMi=[];
+
+  _dbItems.forEach(function(item,i){
+    var lbl=mk('label','ci'+(i===0?' ck':''));
+    var inp=mk('input');inp.type='radio';inp.name='dbr';if(i===0)inp.checked=true;
+    var sp=mk('span',null,item.risk);lbl.appendChild(inp);lbl.appendChild(sp);
+    inp.addEventListener('change',function(){
+      _dbRi=i;_dbMi=[];
+      document.querySelectorAll('#db-risks .ci').forEach(function(el,j){el.classList.toggle('ck',j===i);});
+      renderDbMeas();
+    });
+    con.appendChild(lbl);
+  });
+
+  if(!_dbItems.length){
+    con.innerHTML='<div class="al ali" style="font-size:12px">'+
+      (_dbCurrentAccType
+        ? '事故の型「'+esc(_dbCurrentAccType)+'」に該当するリスクがありません。'
+        : 'このカテゴリ・サブカテゴリにはまだDBが登録されていません。')+
+      '</div>';
+  }
+  renderDbMeas();
+}
+
+function renderDbMeas(){
+  var item=_dbItems[_dbRi];
+  var con=document.getElementById('db-meas');con.innerHTML='';
+  var info=document.getElementById('db-def-info');
+  if(!item){info.innerHTML='';return;}
+  var injL='';INJ.forEach(function(l){if(l.v==item.inj)injL=l.l;});
+  var prbL='';PRB.forEach(function(l){if(l.v===item.prb)prbL=l.l;});
+  info.innerHTML='📌 自動セット：事故の型 <strong>'+esc(item.accType||'未設定')+'</strong>　ケガ <strong>'+esc(injL||'未設定')+'</strong>　確率 <strong>'+esc(prbL||'未設定')+'</strong>';
+  _dbMi=[];
+  item.measures.forEach(function(m,i){
+    var lbl=mk('label','ci');
+    var inp=mk('input');inp.type='checkbox';
+    var sp=mk('span',null,m);
+    lbl.appendChild(inp);lbl.appendChild(sp);
+    inp.addEventListener('change',function(e){
+      if(e.target.checked){_dbMi.push(i);}
+      else{_dbMi=_dbMi.filter(function(x){return x!==i;});}
+      lbl.classList.toggle('ck',e.target.checked);
+    });
+    con.appendChild(lbl);
+  });
+}
+
+function openDb(cid, r){
+  _dbCid=cid;_dbRi=0;_dbMi=[];_dbItems=[];
+
+  var currentAccType=(r&&r.accType)?r.accType:'';
+
+  var parentStep=null;
+  steps.forEach(function(s){s.contents.forEach(function(c){
+    if(c.id===cid)parentStep=s;
+  });});
+
+  var allowedCats=['一般'];
+  if(parentStep){
+    parentStep.workType.forEach(function(wt){
+      var dbCat=WTYPE_DB_MAP[wt];
+      if(dbCat&&allowedCats.indexOf(dbCat)<0)allowedCats.push(dbCat);
+    });
+  }
+
+  var lbl='';steps.forEach(function(s){s.contents.forEach(function(c){
+    if(c.id===cid)lbl='→ '+esc(s.name||'ステップ')+' / '+esc(c.name||'作業内容');
+  });});
+  document.getElementById('db-lbl').innerHTML=lbl;
+  initDbModal(allowedCats,currentAccType);
+  document.getElementById('db-modal').classList.add('open');
+}
+function closeDb(){document.getElementById('db-modal').classList.remove('open');}
+function addFromDb(){
+  if(_dbMi.length===0){alert('対策を1つ以上選んでください');return;}
+  var item=_dbItems[_dbRi];if(!item)return;
+  var meas=_dbMi.map(function(i){return item.measures[i];});
+  var c=findC(_dbCid);if(!c)return;
+  var target=c.risks.find(function(r){return !r.risk&&!r.measure;});
+  if(!target){c.risks.push(newR());target=c.risks[c.risks.length-1];}
+  target.risk=item.risk;
+  target.measure=meas.join('\n');
+  target.accType=item.accType||'';
+  target.inj=item.inj||'';
+  target.prb=item.prb||'';
+  closeDb();renderRisk();markDirty();
+}
+
+
+// ---------- ③ プレビュー ----------
+function getBaseInfo(){
+  return {
+    date: document.getElementById('f-date').value,
+    title: document.getElementById('f-title').value,
+    site: document.getElementById('ac-site-wrap')._inp ? document.getElementById('ac-site-wrap')._inp.value : '',
+    mgr:  document.getElementById('ac-mgr-wrap')._inp  ? document.getElementById('ac-mgr-wrap')._inp.value  : '',
+    company: document.getElementById('ac-comp-wrap')._inp ? document.getElementById('ac-comp-wrap')._inp.value : ''
+  };
+}
+function renderPreview(){
+  var area=document.getElementById('pvwrap'),miss=getMiss(),m2=document.getElementById('malert2');
+  m2.innerHTML=miss.length>0?'<div class="al ald no-print">⚠️ 特殊作業（'+miss.join('・')+'）のリスク入力が不足しています。</div>':'';
+  var bi=getBaseInfo();
+  var html='<div class="pttl">'+esc(bi.title||'作業計画書')+'</div><div class="pbar"></div>';
+  html+='<table class="pt">'
+    +'<tr><th style="width:13%">作業日</th><td style="width:25%">'+esc(bi.date)+'</td><th style="width:13%">工事現場責任者</th><td>'+esc(bi.mgr)+'</td></tr>'
+    +'<tr><th>作業場所</th><td colspan="3">'+esc(bi.site)+'</td></tr>'
+    +'<tr><th>会社名</th><td colspan="3">'+esc(bi.company)+'</td></tr>'
+    +'</table>';
+  html+='<div class="psec">作業ステップ・作業内容・リスク・対策</div>';
+  // 列幅比率 3:5:5:1:1:1:1:5 → 合計22
+  html+='<table class="pt"><colgroup>'
+    +'<col style="width:13.6%">'   // ステップ
+    +'<col style="width:22.7%">'   // 作業内容
+    +'<col style="width:22.7%">'   // リスク
+    +'<col style="width:4.5%">'    // 事故型
+    +'<col style="width:4.5%">'    // 大きさ
+    +'<col style="width:4.5%">'    // 発生率
+    +'<col style="width:4.5%">'    // 評価点
+    +'<col style="width:4.5%">'    // レベル
+    +'<col>'                        // リスク低減対策（残り）
+    +'</colgroup>'
+    +'<tr>'
+    +'<th style="color:#000;background:#e2e8f0;">ステップ</th>'
+    +'<th style="color:#000;background:#e2e8f0;">作業内容</th>'
+    +'<th style="color:#000;background:#e2e8f0;">リスク</th>'
+    +'<th style="color:#000;background:#e2e8f0;">事故型</th>'
+    +'<th style="color:#000;background:#e2e8f0;">大きさ</th>'
+    +'<th style="color:#000;background:#e2e8f0;">発生率</th>'
+    +'<th style="color:#000;background:#e2e8f0;">評価点</th>'
+    +'<th style="color:#000;background:#e2e8f0;">レベル</th>'
+    +'<th style="color:#000;background:#e2e8f0;">リスク低減対策</th>'
+    +'</tr>';
+  // ステップごとの背景色なし（白地に統一）
+  steps.forEach(function(s,si){
+    var isSp=SPECIAL.some(function(t){return s.workType.indexOf(t)>=0;});
+    var wb=s.workType.map(function(t){
+      var bc=t==='高所作業'?'bred':t==='火気作業'?'bylw':(SPECIAL.indexOf(t)>=0)?'borg':'bgry';
+      return '<span class="badge '+bc+'" style="font-size:9px;margin:1px">'+t+'</span>';
+    }).join('');
+
+    // totalRows = 全リスクの対策行数合計（対策が複数なら複数行）
+    function measLines(r){var ms=r.measure?r.measure.split('\n').filter(function(x){return x.trim();}):[];return ms.length||1;}
+    var totalRows=0;
+    s.contents.forEach(function(c){c.risks.forEach(function(r){totalRows+=measLines(r);});});
+
+    var stepDone=false;
+    s.contents.forEach(function(c,ci){
+      var contRows=0;c.risks.forEach(function(r){contRows+=measLines(r);});
+      c.risks.forEach(function(r,ri){
+        var ra=calcRA(r.inj,r.prb);
+        var injNum=r.inj?'①②③④'.charAt(Number(r.inj)-1):'';
+        var ms=r.measure?r.measure.split('\n').filter(function(x){return x.trim();}):[''];
+        if(!ms.length)ms=[''];
+        var rRows=ms.length;
+
+        ms.forEach(function(mLine,mi){
+          html+='<tr>';
+          // ステップ列：最初の行だけrowspan
+          if(!stepDone&&mi===0&&ri===0){
+            html+='<td rowspan="'+totalRows+'" style="color:#000;font-weight:700;vertical-align:top;">'+esc(s.name)+'<div style="margin-top:3px">'+wb+'</div></td>';
+            stepDone=true;
+          }
+          // 作業内容列：最初の行だけrowspan
+          if(ri===0&&mi===0){
+            html+='<td rowspan="'+contRows+'" style="color:#000;vertical-align:top;">'+esc(c.name)+'</td>';
+          }
+          // リスク・RA列：対策の最初の行だけrowspan
+          if(mi===0){
+            html+='<td rowspan="'+rRows+'" style="color:#000;font-size:10px;white-space:pre-wrap;vertical-align:top;">'+esc(r.risk)+'</td>';
+            html+='<td rowspan="'+rRows+'" style="color:#000;font-size:10px;vertical-align:top;">'+esc(r.accType)+'</td>';
+            html+='<td rowspan="'+rRows+'" style="color:#000;text-align:center;vertical-align:top;">'+injNum+'</td>';
+            html+='<td rowspan="'+rRows+'" style="color:#000;text-align:center;vertical-align:top;">'+esc(r.prb||'')+'</td>';
+            html+='<td rowspan="'+rRows+'" style="color:#000;text-align:center;vertical-align:top;">'+(ra.sc!=='-'?ra.sc:'-')+'</td>';
+            html+='<td rowspan="'+rRows+'" style="color:#000;text-align:center;font-weight:700;vertical-align:top;">'+(ra.lv!=='-'?ra.lv:'-')+'</td>';
+          }
+          // 対策列：1行ずつ
+          html+='<td style="color:#000;font-size:10px;">'+esc(mLine)+'</td>';
+          html+='</tr>';
+        });
+      });
+    });
+  });
+  html+='</table>';
+  area.innerHTML=html;
+}
+
+// ---------- Excel出力（純粋JS / ライブラリ不要）----------
+// 発生率のExcel出力用ラベル変換（画面表示とは別）
+var PRB_XL={'A':'A：ない','B':'B：有り','C':'C：高い','D':'D：確実'};
+function prbXl(v){return PRB_XL[v]||v||'';}
+
+// Excelデータ（Blob）を生成して返す
+function buildXlsxBlob(){
+  var bi=getBaseInfo();
+
+  // --- データ行を組み立て ---
+  // 列: A(空), B(注文番号/工事名/...), C(値), D, E(ラベル), F, G(値/責任者名), H, I, J(会社名)
+  var wsData=[];
+  wsData.push(['','注文番号','','','','','','','','']);
+  wsData.push(['','工事名',bi.title,'','元請会社名','','','日付　'+bi.date,'','']);
+  wsData.push(['','工事場所',bi.site,'','工事管理者名','','','','','']);
+  wsData.push(['','工事日',bi.date,'','工事現場責任者','',bi.mgr,'','',''+bi.company]);
+  wsData.push([]);
+  wsData.push([
+    '','作業ステップ','作業内容(具体的に)','リスク','事故の型',
+    'ケガの大きさ','ケガの発生確率','評価点','リスクレベル','リスク低減対策'
+  ]);
+  steps.forEach(function(s){
+    s.contents.forEach(function(c,ci){
+      c.risks.forEach(function(r,ri){
+        var ra=calcRA(r.inj,r.prb);
+        var injNum=r.inj?'①②③④'.charAt(Number(r.inj)-1):'';
+        var ms=r.measure?r.measure.split('\n').filter(function(x){return x.trim();}):[''];
+        if(!ms.length)ms=[''];
+        ms.forEach(function(mLine,mi){
+          wsData.push([
+            '',
+            (ci===0&&ri===0&&mi===0)?s.name:'',
+            (ri===0&&mi===0)?c.name:'',
+            mi===0?r.risk:'',
+            mi===0?r.accType:'',
+            mi===0?injNum:'',
+            mi===0?(r.prb?prbXl(r.prb):''):'',
+            mi===0?(ra.sc!=='-'?String(ra.sc):''):'',
+            mi===0?(ra.lv!=='-'?ra.lv:''):'',
+            mLine
+          ]);
+        });
+      });
+    });
+  });
+
+  // --- 列幅（文字数ベース）---
+  var colWidths=[4,22,20,22,12,10,10,6,8,35];
+
+  // ================================================================
+  // 以下：xlsx形式をゼロから生成（SheetJS不要）
+  // Open XML SpreadsheetML を ZIP で包む
+  // ================================================================
+
+  // ---- 文字列をUTF-8バイト列に変換 ----
+  function strToBytes(str){
+    var out=[],i=0;
+    while(i<str.length){
+      var c=str.charCodeAt(i++);
+      if(c<0x80){out.push(c);}
+      else if(c<0x800){out.push(0xC0|(c>>6),0x80|(c&0x3F));}
+      else if(c>=0xD800&&c<=0xDBFF&&i<str.length){
+        var c2=str.charCodeAt(i++);
+        if(c2>=0xDC00&&c2<=0xDFFF){
+          var cp=0x10000+((c-0xD800)<<10)+(c2-0xDC00);
+          out.push(0xF0|(cp>>18),0x80|((cp>>12)&0x3F),0x80|((cp>>6)&0x3F),0x80|(cp&0x3F));
+        }else{out.push(0xEF,0xBF,0xBD);i--;}
+      }else{out.push(0xE0|(c>>12),0x80|((c>>6)&0x3F),0x80|(c&0x3F));}
+    }
+    return new Uint8Array(out);
+  }
+
+  // ---- XML特殊文字エスケープ ----
+  function xe(s){
+    return String(s==null?'':s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  }
+
+  // ---- 共有文字列テーブル（sst）を使ったシート生成 ----
+  var sst=[];var sstMap={};
+  function si(v){
+    var s=String(v==null?'':v);
+    if(s in sstMap)return sstMap[s];
+    var idx=sst.length;sst.push(s);sstMap[s]=idx;return idx;
+  }
+
+  // セルアドレス変換
+  function colName(n){
+    var s='';n++;
+    while(n>0){s=String.fromCharCode(64+(n%26||26))+s;n=Math.floor((n-(n%26||26))/26);}
+    return s;
+  }
+
+  // シートXML生成
+  var sheetRows=[];
+  wsData.forEach(function(row,ri){
+    var cells=[];
+    row.forEach(function(val,ci){
+      var addr=colName(ci)+(ri+1);
+      var s=String(val==null?'':val);
+      if(s===''){cells.push('<c r="'+addr+'"/>');return;}
+      // 数値かどうか
+      var num=s!==''&&!isNaN(s)&&s.trim()!=='';
+      if(num){cells.push('<c r="'+addr+'" t="n"><v>'+xe(s)+'</v></c>');}
+      else{cells.push('<c r="'+addr+'" t="s"><v>'+si(s)+'</v></c>');}
+    });
+    sheetRows.push('<row r="'+(ri+1)+'">'+cells.join('')+'</row>');
+  });
+
+  // 列幅設定
+  var colsXml=colWidths.map(function(w,i){
+    return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>';
+  }).join('');
+
+  var sheetXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<cols>'+colsXml+'</cols>'
+    +'<sheetData>'+sheetRows.join('')+'</sheetData>'
+    +'</worksheet>';
+
+  // 共有文字列XML
+  var sstXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' count="'+sst.length+'" uniqueCount="'+sst.length+'">'
+    +sst.map(function(s){return '<si><t xml:space="preserve">'+xe(s)+'</t></si>';}).join('')
+    +'</sst>';
+
+  // workbook.xml
+  var wbXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets><sheet name="ステップ抽出シート" sheetId="1" r:id="rId1"/></sheets>'
+    +'</workbook>';
+
+  // [Content_Types].xml
+  var ctXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    +'</Types>';
+
+  // _rels/.rels
+  var relsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    +'</Relationships>';
+
+  // xl/_rels/workbook.xml.rels
+  var wbRelsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
+    +'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
+    +'</Relationships>';
+
+  // ---- ZIP生成（minimalなストアモード実装）----
+  function makeZip(files){
+    // files: [{name, data: Uint8Array}]
+    var parts=[];
+    var centralDir=[];
+    var offset=0;
+
+    function u16(n){return [n&0xFF,(n>>8)&0xFF];}
+    function u32(n){return [n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF];}
+
+    // CRC-32
+    var crcTable=(function(){
+      var t=new Uint32Array(256);
+      for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):c>>>1;t[i]=c;}
+      return t;
+    })();
+    function crc32(buf){
+      var c=0xFFFFFFFF;
+      for(var i=0;i<buf.length;i++)c=crcTable[(c^buf[i])&0xFF]^(c>>>8);
+      return (c^0xFFFFFFFF)>>>0;
+    }
+
+    files.forEach(function(f){
+      var name=strToBytes(f.name);
+      var data=f.data;
+      var crc=crc32(data);
+      var localHeader=[0x50,0x4B,0x03,0x04,
+        0x14,0x00, // version needed
+        0x00,0x00, // flags
+        0x00,0x00, // compression: stored
+        0x00,0x00,0x00,0x00, // mod time/date
+      ].concat(u32(crc)).concat(u32(data.length)).concat(u32(data.length))
+       .concat(u16(name.length)).concat(u16(0));
+      var lhArr=new Uint8Array(localHeader.length+name.length+data.length);
+      lhArr.set(localHeader);lhArr.set(name,localHeader.length);lhArr.set(data,localHeader.length+name.length);
+      parts.push(lhArr);
+
+      // central dir entry
+      centralDir.push({name:name,crc:crc,size:data.length,offset:offset});
+      offset+=lhArr.length;
+    });
+
+    var cdParts=[];
+    centralDir.forEach(function(e){
+      var cd=[0x50,0x4B,0x01,0x02,
+        0x14,0x00,0x14,0x00,
+        0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,
+      ].concat(u32(e.crc)).concat(u32(e.size)).concat(u32(e.size))
+       .concat(u16(e.name.length)).concat(u16(0)).concat(u16(0))
+       .concat(u16(0)).concat(u16(0)).concat(u32(0)).concat(u32(e.offset));
+      var arr=new Uint8Array(cd.length+e.name.length);
+      arr.set(cd);arr.set(e.name,cd.length);
+      cdParts.push(arr);
+    });
+    var cdSize=cdParts.reduce(function(a,b){return a+b.length;},0);
+    var eocd=[0x50,0x4B,0x05,0x06,
+      0x00,0x00,0x00,0x00,
+    ].concat(u16(files.length)).concat(u16(files.length))
+     .concat(u32(cdSize)).concat(u32(offset))
+     .concat(u16(0));
+    var totalSize=offset+cdSize+eocd.length;
+    var zip=new Uint8Array(totalSize);
+    var pos=0;
+    parts.forEach(function(p){zip.set(p,pos);pos+=p.length;});
+    cdParts.forEach(function(p){zip.set(p,pos);pos+=p.length;});
+    zip.set(eocd,pos);
+    return zip;
+  }
+
+  var files=[
+    {name:'[Content_Types].xml',   data:strToBytes(ctXml)},
+    {name:'_rels/.rels',            data:strToBytes(relsXml)},
+    {name:'xl/workbook.xml',        data:strToBytes(wbXml)},
+    {name:'xl/_rels/workbook.xml.rels', data:strToBytes(wbRelsXml)},
+    {name:'xl/worksheets/sheet1.xml',   data:strToBytes(sheetXml)},
+    {name:'xl/sharedStrings.xml',   data:strToBytes(sstXml)},
+  ];
+
+  var zipData=makeZip(files);
+  return new Blob([zipData],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+
+// Excelをダウンロードする
+function exportXlsx(){
+  var blob=buildXlsxBlob();
+  if(!blob){alert('Excelデータの生成に失敗しました。');return;}
+  var fname=makeSaveFileName()+'.xlsx';
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=fname;a.target='_blank';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+}
+
+// ================================================================
+// PC用：雛形レイアウト形式 Excel出力（VBAマクロと同一配置）
+// ----------------------------------------------------------------
+// 雛形セル配置:
+//   D4=工事名  D5=工事場所  D6=工事日  E6=責任者  F6=会社名
+//   D12〜=作業ステップ  E12〜=作業内容  F12〜=リスク
+//   G12〜=事故の型  H12〜=ケガの大きさ  I12〜=発生確率
+//   L12〜=リスク低減対策（J・K列は空白：評価点・レベルは計算式で対応）
+//   20行でシート追加
+// ================================================================
+function buildXlsxBlobPC(){
+  var bi=getBaseInfo();
+
+  // データ行を収集（1行1対策、VBAと同じ列順）
+  var dataRows=[];
+  steps.forEach(function(s){
+    s.contents.forEach(function(c,ci){
+      c.risks.forEach(function(r,ri){
+        var injNum=r.inj?'①②③④'.charAt(Number(r.inj)-1):'';
+        var ms=r.measure?r.measure.split('\n').filter(function(x){return x.trim();}):[''];
+        if(!ms.length)ms=[''];
+        ms.forEach(function(mLine,mi){
+          dataRows.push({
+            step: (ci===0&&ri===0&&mi===0)?s.name:'',
+            cont: (ri===0&&mi===0)?c.name:'',
+            risk: mi===0?r.risk:'',
+            acc:  mi===0?r.accType:'',
+            inj:  mi===0?injNum:'',
+            prb:  mi===0?(r.prb?prbXl(r.prb):''):'',
+            meas: mLine
+          });
+        });
+      });
+    });
+  });
+
+  // ---- 内部ユーティリティ（buildXlsxBlobと共通ロジックを再実装）----
+  function strToBytes(str){
+    var out=[],i=0;
+    while(i<str.length){
+      var c=str.charCodeAt(i++);
+      if(c<0x80){out.push(c);}
+      else if(c<0x800){out.push(0xC0|(c>>6),0x80|(c&0x3F));}
+      else if(c>=0xD800&&c<=0xDBFF&&i<str.length){
+        var c2=str.charCodeAt(i++);
+        if(c2>=0xDC00&&c2<=0xDFFF){
+          var cp=0x10000+((c-0xD800)<<10)+(c2-0xDC00);
+          out.push(0xF0|(cp>>18),0x80|((cp>>12)&0x3F),0x80|((cp>>6)&0x3F),0x80|(cp&0x3F));
+        }else{out.push(0xEF,0xBF,0xBD);i--;}
+      }else{out.push(0xE0|(c>>12),0x80|((c>>6)&0x3F),0x80|(c&0x3F));}
+    }
+    return new Uint8Array(out);
+  }
+  function xe(s){
+    return String(s==null?'':s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+  }
+  var sst=[];var sstMap={};
+  function si(v){
+    var s=String(v==null?'':v);
+    if(s in sstMap)return sstMap[s];
+    var idx=sst.length;sst.push(s);sstMap[s]=idx;return idx;
+  }
+  function colName(n){
+    var s='';n++;
+    while(n>0){s=String.fromCharCode(64+(n%26||26))+s;n=Math.floor((n-(n%26||26))/26);}
+    return s;
+  }
+
+  // 雛形の列構成（A=0〜L=11）
+  // 書き込む列インデックス（0始まり）
+  //   D=3, E=4, F=5, G=6, H=7, I=8, J=9(空), K=10(空), L=11
+  var COLS={step:3,cont:4,risk:5,acc:6,inj:7,prb:8,meas:11};
+  var TOTAL_COLS=12; // A〜L
+
+  // シートごとのデータを生成する関数
+  function makeSheetXml(sheetData){
+    // sheetData: {bi, rows(最大20件), sheetRows(ヘッダー行含む全セルデータ)}
+    var rowXmls=[];
+
+    // 基本情報行（雛形のD4,D5,D6,E6,F6に対応）
+    // 行4（row=4）
+    var r4=new Array(TOTAL_COLS).fill('');
+    r4[3]=sheetData.bi.title;     // D4=工事名
+    var cells4=makeCells(r4,4);
+    rowXmls.push('<row r="4">'+cells4+'</row>');
+
+    // 行5（row=5）
+    var r5=new Array(TOTAL_COLS).fill('');
+    r5[3]=sheetData.bi.site;      // D5=工事場所
+    rowXmls.push('<row r="5">'+makeCells(r5,5)+'</row>');
+
+    // 行6（row=6）
+    var r6=new Array(TOTAL_COLS).fill('');
+    r6[3]=sheetData.bi.date;      // D6=工事日
+    r6[4]=sheetData.bi.mgr;       // E6=責任者
+    r6[5]=sheetData.bi.company;   // F6=会社名
+    rowXmls.push('<row r="6">'+makeCells(r6,6)+'</row>');
+
+    // データ行（12行目から、最大20行）
+    sheetData.rows.forEach(function(dr,idx){
+      var rowNum=12+idx;
+      var row=new Array(TOTAL_COLS).fill('');
+      row[COLS.step]=dr.step;
+      row[COLS.cont]=dr.cont;
+      row[COLS.risk]=dr.risk;
+      row[COLS.acc] =dr.acc;
+      row[COLS.inj] =dr.inj;
+      row[COLS.prb] =dr.prb;
+      row[COLS.meas]=dr.meas;
+      rowXmls.push('<row r="'+rowNum+'">'+makeCells(row,rowNum)+'</row>');
+    });
+
+    // 列幅（A〜L、D列以降を広めに）
+    var colWidths=[4,4,4,22,20,22,10,8,8,6,6,35];
+    var colsXml=colWidths.map(function(w,i){
+      return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>';
+    }).join('');
+
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+      +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+      +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+      +'<cols>'+colsXml+'</cols>'
+      +'<sheetData>'+rowXmls.join('')+'</sheetData>'
+      +'</worksheet>';
+  }
+
+  function makeCells(row,rowNum){
+    return row.map(function(val,ci){
+      var addr=colName(ci)+rowNum;
+      var s=String(val==null?'':val);
+      if(s==='')return '<c r="'+addr+'"/>';
+      return '<c r="'+addr+'" t="s"><v>'+si(s)+'</v></c>';
+    }).join('');
+  }
+
+  // シート分割（20行ごと）
+  var sheets=[];
+  var ROWS_PER_SHEET=20;
+  var totalSheets=Math.max(1,Math.ceil(dataRows.length/ROWS_PER_SHEET));
+  for(var p=0;p<totalSheets;p++){
+    var chunk=dataRows.slice(p*ROWS_PER_SHEET,(p+1)*ROWS_PER_SHEET);
+    sheets.push({bi:bi,rows:chunk,pageNum:p});
+  }
+
+  // XML生成
+  var sheetXmls=sheets.map(function(sd){return makeSheetXml(sd);});
+
+  // 共有文字列XML
+  var sstXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' count="'+sst.length+'" uniqueCount="'+sst.length+'">'
+    +sst.map(function(s){return '<si><t xml:space="preserve">'+xe(s)+'</t></si>';}).join('')
+    +'</sst>';
+
+  // シート名
+  var sheetNames=sheets.map(function(sd,i){
+    return i===0?'作業計画書':'作業計画書_'+i;
+  });
+
+  // workbook.xml
+  var wbSheets=sheetNames.map(function(n,i){
+    return '<sheet name="'+xe(n)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>';
+  }).join('');
+  var wbXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+    +' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets>'+wbSheets+'</sheets>'
+    +'</workbook>';
+
+  // workbook.xml.rels
+  var wbRelsEntries=sheetNames.map(function(n,i){
+    return '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>';
+  });
+  wbRelsEntries.push('<Relationship Id="rId'+(sheetNames.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>');
+  var wbRelsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +wbRelsEntries.join('')
+    +'</Relationships>';
+
+  // [Content_Types].xml
+  var ctOverrides=sheetNames.map(function(n,i){
+    return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+  }).join('');
+  var ctXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +ctOverrides
+    +'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    +'</Types>';
+
+  // _rels/.rels
+  var relsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    +'</Relationships>';
+
+  // ZIPファイルリスト
+  var files=[
+    {name:'[Content_Types].xml',      data:strToBytes(ctXml)},
+    {name:'_rels/.rels',               data:strToBytes(relsXml)},
+    {name:'xl/workbook.xml',           data:strToBytes(wbXml)},
+    {name:'xl/_rels/workbook.xml.rels',data:strToBytes(wbRelsXml)},
+    {name:'xl/sharedStrings.xml',      data:strToBytes(sstXml)},
+  ];
+  sheetXmls.forEach(function(xml,i){
+    files.push({name:'xl/worksheets/sheet'+(i+1)+'.xml', data:strToBytes(xml)});
+  });
+
+  // ZIP生成（buildXlsxBlobと同じmakeZipを使用）
+  function crc32(buf){
+    var t=new Uint32Array(256);
+    for(var i2=0;i2<256;i2++){var c2=i2;for(var j=0;j<8;j++)c2=c2&1?(0xEDB88320^(c2>>>1)):c2>>>1;t[i2]=c2;}
+    var c=0xFFFFFFFF;
+    for(var k=0;k<buf.length;k++)c=t[(c^buf[k])&0xFF]^(c>>>8);
+    return(c^0xFFFFFFFF)>>>0;
+  }
+  function u16(n){return[n&0xFF,(n>>8)&0xFF];}
+  function u32(n){return[n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>24)&0xFF];}
+  var parts=[],centralDir=[],offset=0;
+  files.forEach(function(f){
+    var name=strToBytes(f.name);
+    var data=f.data;
+    var crc=crc32(data);
+    var lh=[0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+      .concat(u32(crc)).concat(u32(data.length)).concat(u32(data.length))
+      .concat(u16(name.length)).concat(u16(0));
+    var arr=new Uint8Array(lh.length+name.length+data.length);
+    arr.set(lh);arr.set(name,lh.length);arr.set(data,lh.length+name.length);
+    parts.push(arr);
+    centralDir.push({name:name,crc:crc,size:data.length,offset:offset});
+    offset+=arr.length;
+  });
+  var cdParts=[];
+  centralDir.forEach(function(e){
+    var cd=[0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+      .concat(u32(e.crc)).concat(u32(e.size)).concat(u32(e.size))
+      .concat(u16(e.name.length)).concat(u16(0)).concat(u16(0))
+      .concat(u16(0)).concat(u16(0)).concat(u32(0)).concat(u32(e.offset));
+    var arr=new Uint8Array(cd.length+e.name.length);
+    arr.set(cd);arr.set(e.name,cd.length);cdParts.push(arr);
+  });
+  var cdSize=cdParts.reduce(function(a,b){return a+b.length;},0);
+  var eocd=[0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]
+    .concat(u16(files.length)).concat(u16(files.length))
+    .concat(u32(cdSize)).concat(u32(offset)).concat(u16(0));
+  var totalSize=offset+cdSize+eocd.length;
+  var zip=new Uint8Array(totalSize);
+  var pos=0;
+  parts.forEach(function(p){zip.set(p,pos);pos+=p.length;});
+  cdParts.forEach(function(p){zip.set(p,pos);pos+=p.length;});
+  zip.set(eocd,pos);
+  return new Blob([zip],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+
+function exportXlsxPc(){
+  var bi=getBaseInfo();
+  // データ行収集（雛形取込.py が読む形式）
+  var rows=[];
+  steps.forEach(function(s){
+    s.contents.forEach(function(c,ci){
+      c.risks.forEach(function(r,ri){
+        var ms=r.measure?r.measure.split('\n').filter(function(x){return x.trim();}):[''];
+        if(!ms.length)ms=[''];
+        ms.forEach(function(mLine,mi){
+          rows.push({
+            step:(ci===0&&ri===0&&mi===0)?s.name:'',
+            cont:(ri===0&&mi===0)?c.name:'',
+            risk:mi===0?r.risk:'',
+            acc: mi===0?r.accType:'',
+            inj: mi===0?String(r.inj||''):'',
+            prb: mi===0?(r.prb||''):'',
+            meas:mLine
+          });
+        });
+      });
+    });
+  });
+
+  var payload=JSON.stringify({bi:bi,rows:rows},null,2);
+  var blob=new Blob([payload],{type:'application/json'});
+  var fname=makeSaveFileName()+'.json';
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=fname;a.target='_blank';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
+
+  // 使い方案内
+  alert('JSONを出力しました。\n\n手順：\n① 「雛形取込.py」をダブルクリック\n② 今ダウンロードした「'+fname+'」を選択\n③ 雛形Excelが自動生成されます');
+}
+
+// ================================================================
+// ★★★ リスク・対策DB：外部xlsxファイルの読み込み ★★★
+// ・DB管理者モーダル / メール送信機能は廃止し、
+//   Excelで編集した「リスク対策DB.xlsx」を直接読み込む方式に変更。
+// ・SheetJS等のライブラリは使わず、ブラウザ標準のDecompressionStream
+//   （ZIPのdeflate展開）とDOMParser（XML解析）だけで実装。
+// ================================================================
+var LS_DB_CACHE = 'sak_db_cache';   // 直近に読み込んだDBのキャッシュ（内部利用のみ）
+var LS_DB_NAME  = 'sak_db_name';    // 直近に読み込んだファイル名
+
+// ---------- ZIP展開 ----------
+function u32le(dv,off){return dv.getUint32(off,true);}
+function u16le(dv,off){return dv.getUint16(off,true);}
+
+async function inflateRawBytes(bytes){
+  if(typeof DecompressionStream==='undefined'){
+    throw new Error('このブラウザはZIP展開(DecompressionStream)に対応していません。最新のChrome／Safari／Edgeでお試しください。');
+  }
+  var ds=new DecompressionStream('deflate-raw');
+  var stream=new Blob([bytes]).stream().pipeThrough(ds);
+  var buf=await new Response(stream).arrayBuffer();
+  return new Uint8Array(buf);
+}
+
+// xlsx(zip)のArrayBufferを { "xl/worksheets/sheet1.xml": Uint8Array, ... } に展開
+async function unzipXlsx(arrayBuffer){
+  var bytes=new Uint8Array(arrayBuffer);
+  var dv=new DataView(arrayBuffer);
+
+  // End Of Central Directory (EOCD) を末尾から探す
+  var eocdSig=0x06054b50, eocdOff=-1;
+  var maxBack=Math.min(bytes.length,65557);
+  for(var i=bytes.length-22;i>=bytes.length-maxBack;i--){
+    if(i<0)break;
+    if(u32le(dv,i)===eocdSig){eocdOff=i;break;}
+  }
+  if(eocdOff<0)throw new Error('ZIP構造を認識できませんでした（EOCDが見つかりません）。ファイルが破損している可能性があります。');
+
+  var entryCount=u16le(dv,eocdOff+10);
+  var cdOffset=u32le(dv,eocdOff+16);
+
+  var files={};
+  var pos=cdOffset;
+  var cdSig=0x02014b50;
+  for(var e=0;e<entryCount;e++){
+    if(u32le(dv,pos)!==cdSig)throw new Error('ZIPの中央ディレクトリを解析できませんでした。');
+    var compMethod=u16le(dv,pos+10);
+    var compSize=u32le(dv,pos+20);
+    var uncompSize=u32le(dv,pos+24);
+    var fnLen=u16le(dv,pos+28);
+    var exLen=u16le(dv,pos+30);
+    var cmLen=u16le(dv,pos+32);
+    var localOff=u32le(dv,pos+42);
+    var fname=new TextDecoder('utf-8').decode(bytes.subarray(pos+46,pos+46+fnLen));
+    pos=pos+46+fnLen+exLen+cmLen;
+
+    // ローカルヘッダを読んでデータ開始位置を特定
+    var lSig=u32le(dv,localOff);
+    if(lSig!==0x04034b50)throw new Error('ZIPのローカルヘッダを解析できませんでした：'+fname);
+    var lFnLen=u16le(dv,localOff+26);
+    var lExLen=u16le(dv,localOff+28);
+    var dataStart=localOff+30+lFnLen+lExLen;
+    var raw=bytes.subarray(dataStart,dataStart+compSize);
+
+    if(!fname.endsWith('/')){ // ディレクトリエントリは無視
+      if(compMethod===0){
+        files[fname]=raw.slice(0,uncompSize);
+      }else if(compMethod===8){
+        files[fname]=await inflateRawBytes(raw);
+      }else{
+        throw new Error('未対応の圧縮方式です（'+fname+'）。Excelで保存し直してから再度お試しください。');
+      }
+    }
+  }
+  return files;
+}
+
+// ---------- XLSXの中身（XML）をパース ----------
+function xmlDoc(bytes){
+  var text=new TextDecoder('utf-8').decode(bytes);
+  return new DOMParser().parseFromString(text,'application/xml');
+}
+
+function parseSharedStrings(files){
+  var f=files['xl/sharedStrings.xml'];
+  if(!f)return [];
+  var doc=xmlDoc(f);
+  var siList=doc.getElementsByTagName('si');
+  var out=[];
+  for(var i=0;i<siList.length;i++){
+    var tNodes=siList[i].getElementsByTagName('t');
+    var s='';
+    for(var j=0;j<tNodes.length;j++)s+=tNodes[j].textContent;
+    out.push(s);
+  }
+  return out;
+}
+
+// セル参照 "E12" の列部分を0始まりの列番号に変換
+function colLetterToIndex(ref){
+  var m=ref.match(/^([A-Z]+)/i);
+  if(!m)return 0;
+  var s=m[1].toUpperCase(),n=0;
+  for(var i=0;i<s.length;i++)n=n*26+(s.charCodeAt(i)-64);
+  return n-1;
+}
+
+function findSheetXmlPath(files, sheetName){
+  var wbDoc=xmlDoc(files['xl/workbook.xml']);
+  var sheets=wbDoc.getElementsByTagName('sheet');
+  var rId=null;
+  for(var i=0;i<sheets.length;i++){
+    if(sheets[i].getAttribute('name')===sheetName){
+      rId=sheets[i].getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')
+        ||sheets[i].getAttribute('r:id');
+      break;
+    }
+  }
+  if(!rId)return null;
+  var relsDoc=xmlDoc(files['xl/_rels/workbook.xml.rels']);
+  var rels=relsDoc.getElementsByTagName('Relationship');
+  for(var j=0;j<rels.length;j++){
+    if(rels[j].getAttribute('Id')===rId){
+      return 'xl/'+rels[j].getAttribute('Target').replace(/^\/?xl\//,'').replace(/^\.?\//,'');
+    }
+  }
+  return null;
+}
+
+function parseSheetRows(files, sheetPath, sst){
+  var doc=xmlDoc(files[sheetPath]);
+  var rowNodes=doc.getElementsByTagName('row');
+  var rows=[];
+  for(var r=0;r<rowNodes.length;r++){
+    var cNodes=rowNodes[r].getElementsByTagName('c');
+    var rowArr=[];
+    for(var c=0;c<cNodes.length;c++){
+      var cell=cNodes[c];
+      var ref=cell.getAttribute('r')||'';
+      var idx=colLetterToIndex(ref);
+      var t=cell.getAttribute('t');
+      var vNode=cell.getElementsByTagName('v')[0];
+      var val='';
+      if(t==='inlineStr'){
+        var isNode=cell.getElementsByTagName('is')[0];
+        if(isNode)val=isNode.textContent;
+      }else if(vNode){
+        var raw=vNode.textContent;
+        val=(t==='s')?(sst[parseInt(raw,10)]||''):raw;
+      }
+      rowArr[idx]=val;
+    }
+    for(var k=0;k<rowArr.length;k++)if(rowArr[k]===undefined)rowArr[k]='';
+    rows.push(rowArr);
+  }
+  return rows;
+}
+
+// フラットな行データ(A:カテゴリ B:サブカテゴリ C:リスク内容 D:事故の型 E:ケガの大きさ F:発生確率 G:対策)
+// → 既存のRISK_DB階層構造（カテゴリ→サブカテゴリ→リスク項目→対策[]）へ変換
+function rowsToRiskDb(rows){
+  var catOrder=[],catMap={};
+  // 1行目は見出し行として無視
+  for(var i=1;i<rows.length;i++){
+    var row=rows[i]||[];
+    var cat=(row[0]||'').toString().trim();
+    var sub=(row[1]||'').toString().trim();
+    var risk=(row[2]||'').toString().trim();
+    var accType=(row[3]||'').toString().trim();
+    var inj=(row[4]||'').toString().trim();
+    var prb=(row[5]||'').toString().trim();
+    var measure=(row[6]||'').toString().trim();
+    if(!cat||!risk)continue; // 空行はスキップ
+
+    if(!catMap[cat]){catMap[cat]={name:cat,subOrder:[],subMap:{}};catOrder.push(cat);}
+    var co=catMap[cat];
+    var subKey=sub;
+    if(!co.subMap[subKey]){co.subMap[subKey]={name:sub,itemOrder:[],itemMap:{}};co.subOrder.push(subKey);}
+    var so=co.subMap[subKey];
+
+    var itemKey=risk+'|'+accType+'|'+inj+'|'+prb;
+    if(!so.itemMap[itemKey]){
+      so.itemMap[itemKey]={risk:risk,accType:accType,inj:inj?parseInt(inj,10):'',prb:prb,measures:[]};
+      so.itemOrder.push(itemKey);
+    }
+    if(measure)so.itemMap[itemKey].measures.push(measure);
+  }
+
+  return catOrder.map(function(cn){
+    var co=catMap[cn];
+    return {
+      name:co.name,
+      subs:co.subOrder.map(function(sk){
+        var so=co.subMap[sk];
+        return {name:so.name,items:so.itemOrder.map(function(ik){return so.itemMap[ik];})};
+      })
+    };
+  });
+}
+
+function countDbItems(db){
+  var n=0;
+  db.forEach(function(cat){cat.subs.forEach(function(sub){n+=sub.items.length;});});
+  return n;
+}
+
+function setDbStatus(text){
+  var el=document.getElementById('db-status');
+  if(el)el.textContent=text;
+}
+
+// ---------- メイン処理 ----------
+async function loadDbFromFile(file){
+  setDbStatus('読み込み中…');
+  try{
+    var buf=await file.arrayBuffer();
+    var files=await unzipXlsx(buf);
+    if(!files['xl/workbook.xml'])throw new Error('xlsxファイルとして認識できませんでした。');
+    var sst=parseSharedStrings(files);
+    var sheetPath=findSheetXmlPath(files,'DB');
+    if(!sheetPath)throw new Error('「DB」という名前のシートが見つかりませんでした。シート名をご確認ください。');
+    var rows=parseSheetRows(files,sheetPath,sst);
+    var newDb=rowsToRiskDb(rows);
+    if(!newDb.length)throw new Error('DBシートにデータが見つかりませんでした。');
+
+    RISK_DB=newDb;
+    initDbModal();
+    try{
+      localStorage.setItem(LS_DB_CACHE,JSON.stringify(newDb));
+      localStorage.setItem(LS_DB_NAME,file.name);
+    }catch(e){/* 容量超過等は無視（読み込み自体は成功扱い） */}
+
+    setDbStatus('📗 '+file.name+'（'+newDb.length+'カテゴリ／'+countDbItems(newDb)+'件）読込済み');
+  }catch(err){
+    console.error(err);
+    setDbStatus('⚠️ DB読込に失敗しました');
+    alert('DBファイルの読み込みに失敗しました。\n\n'+(err&&err.message?err.message:err));
+  }
+}
+
+// 起動時：前回読み込んだDBがあれば復元、なければ内蔵の初期DBを使用
+var DB_REMOTE_URL='./db/risk-db.xlsx'; // GitHub Pages公開時、同一リポジトリ内のDBファイルを自動取得する
+
+// 起動時：①同一サイト内のDBファイルを自動取得 → ②前回読み込んだキャッシュ → ③内蔵の初期DB
+async function initDbStatus(){
+  // ① リモート(GitHub Pages等)から自動取得を試みる。file://で開いた場合や404時は失敗するので無視して次へ。
+  try{
+    setDbStatus('DBを確認中…');
+    var res=await fetch(DB_REMOTE_URL,{cache:'no-cache'});
+    if(res && res.ok){
+      var buf=await res.arrayBuffer();
+      var files=await unzipXlsx(buf);
+      var sst=parseSharedStrings(files);
+      var sheetPath=findSheetXmlPath(files,'DB');
+      if(sheetPath){
+        var rows=parseSheetRows(files,sheetPath,sst);
+        var db=rowsToRiskDb(rows);
+        if(db.length){
+          RISK_DB=db;
+          initDbModal();
+          try{
+            localStorage.setItem(LS_DB_CACHE,JSON.stringify(db));
+            localStorage.setItem(LS_DB_NAME,'risk-db.xlsx（公開DB）');
+          }catch(e){}
+          setDbStatus('🌐 公開DB読込済み（'+db.length+'カテゴリ／'+countDbItems(db)+'件）');
+          return;
+        }
+      }
+    }
+  }catch(e){ /* file://での起動やネットワーク不可時はここに来る。想定内なので無視 */ }
+
+  // ② 前回このブラウザで読み込んだDBのキャッシュがあれば使う
+  try{
+    var cached=localStorage.getItem(LS_DB_CACHE);
+    var name=localStorage.getItem(LS_DB_NAME)||'';
+    if(cached){
+      var cdb=JSON.parse(cached);
+      if(cdb&&cdb.length){
+        RISK_DB=cdb;
+        initDbModal();
+        setDbStatus('📗 '+name+'（'+cdb.length+'カテゴリ／'+countDbItems(cdb)+'件）読込済み');
+        return;
+      }
+    }
+  }catch(e){/* 破損キャッシュは無視して内蔵DBを使う */}
+
+  // ③ 内蔵の初期DBのまま
+  setDbStatus('📘 内蔵の初期DBを使用中（'+RISK_DB.length+'カテゴリ／'+countDbItems(RISK_DB)+'件）');
+}
+</script>
+</body>
+</html>
