@@ -66,7 +66,7 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 
 /* ========== 統合テーブル（ステップ・作業内容・リスク・対策を1画面で） ========== */
 .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:8px}
-.uni-table{border-collapse:collapse;font-size:12.5px;table-layout:fixed;min-width:1360px}
+.uni-table{border-collapse:collapse;font-size:12.5px;table-layout:fixed;min-width:1420px}
 .uni-table th{background:var(--navy);color:#fff;padding:8px 9px;font-size:11.5px;font-weight:700;text-align:left;position:sticky;top:0;z-index:2}
 .uni-table td{border:1px solid #e2e8f0;padding:7px 9px;vertical-align:top}
 .uni-table tr.row-sp td{background:#fffdf5}
@@ -75,13 +75,16 @@ col.col-cont{width:230px}
 col.col-risk{width:270px}
 col.col-atig{width:150px}
 col.col-meas{width:270px}
-col.col-act{width:52px}
+col.col-act1{width:56px}
+col.col-act2{width:56px}
 .td-step{background:#fde8e8}
 .td-cont{background:#f5f8ff}
 .td-risk{background:#fff5f5}
 .td-atig{background:#fafafa}
 .td-meas{background:#f0fff4}
-.td-act{text-align:center}
+.td-act{text-align:center;background:#fff;border-top-color:#fff;border-bottom-color:#fff}
+.td-act1{border-left:8px solid #fff}
+.td-act2{border-left:8px solid #fff}
 .uni-table textarea.fi{width:100%;resize:vertical;min-height:64px;font-size:13px;padding:6px 7px;line-height:1.5}
 .uni-table select.rals{width:100%;padding:5px 5px;font-size:11.5px;margin-bottom:4px}
 .uni-table .td-act button{display:block;width:100%;margin-bottom:3px;padding:4px 0;font-size:12px}
@@ -2713,13 +2716,13 @@ function renderTable(){
   var wrap=mk('div','table-scroll');
   var table=mk('table','uni-table');
   var colgroup=mk('colgroup');
-  [['col-step',''],['col-cont',''],['col-risk',''],['col-atig',''],['col-meas',''],['col-act','']].forEach(function(c){
+  [['col-step',''],['col-cont',''],['col-risk',''],['col-atig',''],['col-meas',''],['col-act1',''],['col-act2','']].forEach(function(c){
     var col=mk('col');col.className=c[0];colgroup.appendChild(col);
   });
   table.appendChild(colgroup);
   var thead=mk('thead');
   var htr=mk('tr');
-  ['作業ステップ','作業内容','リスク内容','事故の型・大きさ・発生率','リスク低減対策',''].forEach(function(h){
+  ['作業ステップ','作業内容','リスク内容','事故の型・大きさ・発生率','リスク低減対策','',''].forEach(function(h){
     htr.appendChild(mk('th',null,h));
   });
   thead.appendChild(htr);table.appendChild(thead);
@@ -2782,15 +2785,18 @@ function renderTable(){
         measTa.addEventListener('input',function(){r.measure=this.value;markDirty();});
         measTd.appendChild(measTa);tr.appendChild(measTd);
 
-        var actTd=mk('td','td-act');
+        var act1Td=mk('td','td-act td-act1');
         var dbBtn=mkbtn('📚','bg bic',(function(rref,cref){return function(){openDb(cref.id,rref);};})(r,c));
-        dbBtn.title='DBから選ぶ';actTd.appendChild(dbBtn);
-        actTd.appendChild(mkMoveBtn('risk',r.id,c.id));
-        actTd.appendChild(mkbtn('＋','bg bic',function(){addR(c.id);}));
+        dbBtn.title='DBから選ぶ';act1Td.appendChild(dbBtn);
+        act1Td.appendChild(mkMoveBtn('risk',r.id,c.id));
+        tr.appendChild(act1Td);
+
+        var act2Td=mk('td','td-act td-act2');
+        act2Td.appendChild(mkbtn('＋','bg bic',function(){addR(c.id);}));
         if(c.risks.length>1){
-          actTd.appendChild(mkbtn('✕','br bic',function(){delR(c.id,r.id);}));
+          act2Td.appendChild(mkbtn('✕','br bic',function(){delR(c.id,r.id);}));
         }
-        tr.appendChild(actTd);
+        tr.appendChild(act2Td);
 
         tbody.appendChild(tr);
       });
@@ -2977,7 +2983,7 @@ function addFromDb(){
   target.accType=item.accType||'';
   target.inj=item.inj||'';
   target.prb=item.prb||'';
-  closeDb();renderRisk();markDirty();
+  closeDb();renderTable();markDirty();
 }
 
 
