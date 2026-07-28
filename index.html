@@ -66,14 +66,14 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 
 /* ========== 統合テーブル（ステップ・作業内容・リスク・対策を1画面で） ========== */
 .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:8px}
-.uni-table{border-collapse:collapse;font-size:12.5px;table-layout:fixed;min-width:1420px}
+.uni-table{border-collapse:collapse;font-size:12.5px;table-layout:fixed;min-width:1380px}
 .uni-table th{background:var(--navy);color:#fff;padding:8px 9px;font-size:11.5px;font-weight:700;text-align:left;position:sticky;top:0;z-index:2}
 .uni-table td{border:1px solid #e2e8f0;padding:7px 9px;vertical-align:top}
 .uni-table tr.row-sp td{background:#fffdf5}
 col.col-step{width:270px}
 col.col-cont{width:230px}
 col.col-risk{width:270px}
-col.col-atig{width:150px}
+col.col-atig{width:110px}
 col.col-meas{width:270px}
 col.col-act1{width:56px}
 col.col-act2{width:56px}
@@ -102,6 +102,9 @@ col.col-act2{width:56px}
 .cont-no{background:#e2e8f0;color:#475569;min-width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
 .rals{padding:5px 6px;border:1.5px solid var(--bdr);border-radius:5px;font-size:11.5px;background:#fff;outline:none;cursor:pointer}
 .rals:focus{border-color:var(--blue)}
+.atig-full{width:100%;margin-bottom:4px}
+.atig-row2{display:flex;gap:3px;margin-bottom:2px}
+.atig-half{width:50%;min-width:0;padding-left:3px;padding-right:2px}
 .ralv{padding:3px 7px;border-radius:5px;font-size:10.5px;font-weight:900;text-align:center;margin-top:2px;display:block}
 /* Lv: Ⅰ=低リスク(緑)→Ⅳ=高リスク(赤) */
 .lv1{background:var(--gl);color:#166534}
@@ -2759,25 +2762,28 @@ function renderTable(){
         riskTa.addEventListener('input',function(){r.risk=this.value;updBadge();markDirty();});
         riskTd.appendChild(riskTa);tr.appendChild(riskTd);
 
-        // 事故の型／大きさ／発生率　を1列に縦積み
+        // 事故の型・大きさ・発生率　を2段に（1段目：事故の型／2段目：大きさ＋発生率を横並び）
         var atigTd=mk('td','td-atig');
-        var atSel=mk('select','rals');atSel.innerHTML='<option value="">事故の型 --</option>';
+
+        var atSel=mk('select','rals atig-full');atSel.innerHTML='<option value="">型--</option>';
         AT.forEach(function(type){atSel.innerHTML+='<option value="'+esc(type)+'"'+(r.accType===type?' selected':'')+'>'+esc(type)+'</option>';});
         atSel.addEventListener('change',function(){r.accType=this.value;markDirty();});
         atigTd.appendChild(atSel);
 
-        var injSel=mk('select','rals');injSel.innerHTML='<option value="">大きさ -</option>';
+        var row2=mk('div','atig-row2');
+        var injSel=mk('select','rals atig-half');injSel.innerHTML='<option value="">大-</option>';
         INJ.forEach(function(l){injSel.innerHTML+='<option value="'+l.v+'"'+(r.inj==l.v?' selected':'')+'>'+l.l+'</option>';});
         injSel.addEventListener('change',function(){r.inj=this.value;renderTable();markDirty();});
-        atigTd.appendChild(injSel);
+        row2.appendChild(injSel);
 
-        var prbSel=mk('select','rals');prbSel.innerHTML='<option value="">発生率 -</option>';
+        var prbSel=mk('select','rals atig-half');prbSel.innerHTML='<option value="">率-</option>';
         PRB.forEach(function(l){prbSel.innerHTML+='<option value="'+l.v+'"'+(r.prb===l.v?' selected':'')+'>'+l.l+'</option>';});
         prbSel.addEventListener('change',function(){r.prb=this.value;renderTable();markDirty();});
-        atigTd.appendChild(prbSel);
+        row2.appendChild(prbSel);
+        atigTd.appendChild(row2);
 
         var ra=calcRA(r.inj,r.prb);
-        atigTd.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'評価 '+(ra.sc!=='-'?ra.sc+'点 ':'')+'Lv.'+ra.lv));
+        atigTd.appendChild(mk('div','ralv '+(ra.cls||'bgry'),(ra.sc!=='-'?ra.sc+'点 ':'')+'Lv.'+ra.lv));
         tr.appendChild(atigTd);
 
         var measTd=mk('td','td-meas');
