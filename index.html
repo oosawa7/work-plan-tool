@@ -29,7 +29,7 @@ input,textarea,select,button{font-family:'Noto Sans JP',sans-serif}
 .tab:hover{color:var(--navy)}.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
 .tbadge{background:var(--red);color:#fff;border-radius:99px;font-size:10px;padding:1px 6px;font-weight:900;margin-left:4px}
 /* メイン */
-#main{max-width:960px;margin:0 auto;padding:18px 12px 60px}
+#main{max-width:1500px;margin:0 auto;padding:18px 12px 60px}
 .panel{display:none}.panel.active{display:block}
 /* カード */
 .card{background:#fff;border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin-bottom:14px}
@@ -65,23 +65,29 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .aci-del:hover{background:var(--rl);color:var(--red)}
 
 /* ========== 統合テーブル（ステップ・作業内容・リスク・対策を1画面で） ========== */
-.uni-table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
-.uni-table th{background:var(--navy);color:#fff;padding:7px 8px;font-size:11px;font-weight:700;text-align:left;position:sticky;top:0;z-index:2}
-.uni-table td{border:1px solid #e2e8f0;padding:6px 8px;vertical-align:top}
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:8px}
+.uni-table{border-collapse:collapse;font-size:12.5px;table-layout:fixed;min-width:1360px}
+.uni-table th{background:var(--navy);color:#fff;padding:8px 9px;font-size:11.5px;font-weight:700;text-align:left;position:sticky;top:0;z-index:2}
+.uni-table td{border:1px solid #e2e8f0;padding:7px 9px;vertical-align:top}
 .uni-table tr.row-sp td{background:#fffdf5}
-.uni-table col-narrow{width:40px}
-.td-step{width:200px;background:#fde8e8}
-.td-cont{width:170px;background:#f5f8ff}
-.td-risk{width:190px;background:#fff5f5}
-.td-sel{width:78px}
-.td-meas{width:190px;background:#f0fff4}
-.td-act{width:44px;text-align:center}
-.uni-table textarea.fi{width:100%;resize:vertical;min-height:44px;font-size:12px;padding:5px 6px}
-.uni-table select.rals{width:100%;padding:4px 4px;font-size:11px}
+col.col-step{width:270px}
+col.col-cont{width:230px}
+col.col-risk{width:270px}
+col.col-atig{width:150px}
+col.col-meas{width:270px}
+col.col-act{width:52px}
+.td-step{background:#fde8e8}
+.td-cont{background:#f5f8ff}
+.td-risk{background:#fff5f5}
+.td-atig{background:#fafafa}
+.td-meas{background:#f0fff4}
+.td-act{text-align:center}
+.uni-table textarea.fi{width:100%;resize:vertical;min-height:64px;font-size:13px;padding:6px 7px;line-height:1.5}
+.uni-table select.rals{width:100%;padding:5px 5px;font-size:11.5px;margin-bottom:4px}
 .uni-table .td-act button{display:block;width:100%;margin-bottom:3px;padding:4px 0;font-size:12px}
 .step-cell-inner,.cont-cell-inner{display:flex;flex-direction:column;gap:6px}
 .step-top-row,.cont-top-row{display:flex;align-items:center;gap:6px}
-.step-cell-inner .aci,.cont-cell-inner .aci{font-size:12px;padding:5px 7px}
+.step-cell-inner .aci,.cont-cell-inner .aci{font-size:13px;padding:6px 8px}
 .step-no{background:var(--navy);color:#fff;min-width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;flex-shrink:0}
 .step-acts,.cont-acts2{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
 .wtype-btns{display:flex;flex-wrap:wrap;gap:4px}
@@ -91,9 +97,9 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .wtb.s2{background:var(--ol);border-color:#fb923c;color:#9a3412}
 .wtb.s3{background:var(--yl);border-color:#fbbf24;color:#92400e}
 .cont-no{background:#e2e8f0;color:#475569;min-width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0}
-.rals{padding:4px 6px;border:1.5px solid var(--bdr);border-radius:5px;font-size:11px;background:#fff;outline:none;cursor:pointer}
+.rals{padding:5px 6px;border:1.5px solid var(--bdr);border-radius:5px;font-size:11.5px;background:#fff;outline:none;cursor:pointer}
 .rals:focus{border-color:var(--blue)}
-.ralv{padding:2px 6px;border-radius:5px;font-size:10px;font-weight:900;text-align:center;margin-top:4px;display:inline-block}
+.ralv{padding:3px 7px;border-radius:5px;font-size:10.5px;font-weight:900;text-align:center;margin-top:2px;display:block}
 /* Lv: Ⅰ=低リスク(緑)→Ⅳ=高リスク(赤) */
 .lv1{background:var(--gl);color:#166534}
 .lv2{background:var(--yl);color:#92400e}
@@ -104,10 +110,6 @@ select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .ta-meas{background:#f0fff4 !important}
 /* 移動先ボタンの強調 */
 .mv-target{background:#dbeafe !important;border-color:#60a5fa !important;color:#1d4ed8 !important;font-weight:900}
-@media(max-width:900px){
-  .uni-table{font-size:11.5px}
-  .td-step{width:150px}.td-cont{width:130px}.td-risk{width:150px}.td-meas{width:150px}
-}
 /* アラート */
 .al{padding:9px 13px;border-radius:7px;margin-bottom:11px;font-size:13px;font-weight:500;line-height:1.6}
 .alw{background:var(--yl);color:#78350f;border-left:4px solid #f59e0b}
@@ -2708,10 +2710,16 @@ function renderTable(){
     return;
   }
 
+  var wrap=mk('div','table-scroll');
   var table=mk('table','uni-table');
+  var colgroup=mk('colgroup');
+  [['col-step',''],['col-cont',''],['col-risk',''],['col-atig',''],['col-meas',''],['col-act','']].forEach(function(c){
+    var col=mk('col');col.className=c[0];colgroup.appendChild(col);
+  });
+  table.appendChild(colgroup);
   var thead=mk('thead');
   var htr=mk('tr');
-  ['','作業ステップ','作業内容','リスク内容','事故の型','大きさ','発生率','リスク低減対策',''].forEach(function(h){
+  ['作業ステップ','作業内容','リスク内容','事故の型・大きさ・発生率','リスク低減対策',''].forEach(function(h){
     htr.appendChild(mk('th',null,h));
   });
   thead.appendChild(htr);table.appendChild(thead);
@@ -2744,33 +2752,33 @@ function renderTable(){
         }
 
         var riskTd=mk('td','td-risk');
-        var riskTa=mk('textarea','fi ta-risk');riskTa.rows=2;riskTa.placeholder='どのような危険があるか';riskTa.value=r.risk;
+        var riskTa=mk('textarea','fi ta-risk');riskTa.rows=3;riskTa.placeholder='どのような危険があるか';riskTa.value=r.risk;
         riskTa.addEventListener('input',function(){r.risk=this.value;updBadge();markDirty();});
         riskTd.appendChild(riskTa);tr.appendChild(riskTd);
 
-        var atTd=mk('td','td-sel');
-        var atSel=mk('select','rals');atSel.innerHTML='<option value="">--</option>';
+        // 事故の型／大きさ／発生率　を1列に縦積み
+        var atigTd=mk('td','td-atig');
+        var atSel=mk('select','rals');atSel.innerHTML='<option value="">事故の型 --</option>';
         AT.forEach(function(type){atSel.innerHTML+='<option value="'+esc(type)+'"'+(r.accType===type?' selected':'')+'>'+esc(type)+'</option>';});
         atSel.addEventListener('change',function(){r.accType=this.value;markDirty();});
-        atTd.appendChild(atSel);tr.appendChild(atTd);
+        atigTd.appendChild(atSel);
 
-        var injTd=mk('td','td-sel');
-        var injSel=mk('select','rals');injSel.innerHTML='<option value="">-</option>';
+        var injSel=mk('select','rals');injSel.innerHTML='<option value="">大きさ -</option>';
         INJ.forEach(function(l){injSel.innerHTML+='<option value="'+l.v+'"'+(r.inj==l.v?' selected':'')+'>'+l.l+'</option>';});
         injSel.addEventListener('change',function(){r.inj=this.value;renderTable();markDirty();});
-        injTd.appendChild(injSel);tr.appendChild(injTd);
+        atigTd.appendChild(injSel);
 
-        var prbTd=mk('td','td-sel');
-        var prbSel=mk('select','rals');prbSel.innerHTML='<option value="">-</option>';
+        var prbSel=mk('select','rals');prbSel.innerHTML='<option value="">発生率 -</option>';
         PRB.forEach(function(l){prbSel.innerHTML+='<option value="'+l.v+'"'+(r.prb===l.v?' selected':'')+'>'+l.l+'</option>';});
         prbSel.addEventListener('change',function(){r.prb=this.value;renderTable();markDirty();});
-        prbTd.appendChild(prbSel);
+        atigTd.appendChild(prbSel);
+
         var ra=calcRA(r.inj,r.prb);
-        prbTd.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'Lv.'+ra.lv));
-        tr.appendChild(prbTd);
+        atigTd.appendChild(mk('div','ralv '+(ra.cls||'bgry'),'評価 '+(ra.sc!=='-'?ra.sc+'点 ':'')+'Lv.'+ra.lv));
+        tr.appendChild(atigTd);
 
         var measTd=mk('td','td-meas');
-        var measTa=mk('textarea','fi ta-meas');measTa.rows=2;measTa.placeholder='具体的な対策内容';measTa.value=r.measure;
+        var measTa=mk('textarea','fi ta-meas');measTa.rows=3;measTa.placeholder='具体的な対策内容';measTa.value=r.measure;
         measTa.addEventListener('input',function(){r.measure=this.value;markDirty();});
         measTd.appendChild(measTa);tr.appendChild(measTd);
 
@@ -2790,7 +2798,8 @@ function renderTable(){
   });
 
   table.appendChild(tbody);
-  con.appendChild(table);
+  wrap.appendChild(table);
+  con.appendChild(wrap);
   updBadge();
 }
 
